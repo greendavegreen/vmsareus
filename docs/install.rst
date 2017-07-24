@@ -15,8 +15,6 @@ sql> create database mydatabase
 don't forget to migrate and create superuser
 python manage.py migrate
 
-
-
 modified the database configuration to point to postgres install
 linux:
 DATABASES = {
