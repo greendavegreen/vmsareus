@@ -243,16 +243,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # AUTHENTICATION CONFIGURATION
 # ------------------------------------------------------------------------------
 AUTHENTICATION_BACKENDS = [
+
     'django.contrib.auth.backends.ModelBackend',
+    'jira_auth.backends.JiraBackend',
+
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+JIRA_URL = "http://jira.cd-adapco.com/rest"
 
 # Some really nice defaults
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-ACCOUNT_ALLOW_REGISTRATION = env.bool('DJANGO_ACCOUNT_ALLOW_REGISTRATION', True)
+ACCOUNT_ALLOW_REGISTRATION = env.bool('DJANGO_ACCOUNT_ALLOW_REGISTRATION', False)
 ACCOUNT_ADAPTER = 'vmsareus.users.adapters.AccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'vmsareus.users.adapters.SocialAccountAdapter'
 
