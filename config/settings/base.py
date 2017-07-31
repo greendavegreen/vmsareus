@@ -55,6 +55,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     # custom users app
     'vmsareus.users.apps.UsersConfig',
+    'vmsareus.vmleases.apps.VmsConfig'
     # Your stuff: custom apps go here
 ]
 
