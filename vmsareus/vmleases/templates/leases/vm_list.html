@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Vms{% endblock %}
+
+
+author = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    core_count = models.IntegerField(choices=CORES)
+    memory_size = models.IntegerField(choices=MEMORIES)
+    disk_size = models.IntegerField(choices=DISKS)
+
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-12">
+        <h1><a href="{% url 'leases:vm_list' %}">{% if user.is_superuser %}Systemwide{% endif %} VMs</a></h1>
+        <table class="table table-responsive table-hover">
+            <thead class="thead-default">
+                <tr>
+                    <th>#</th>
+                    {% if user.is_superuser %}<th>Owner</th>{%  endif %}
+                    <th>CPU</th>
+                    <th>Memory</th>
+                    <th>Disk</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vm in vms %}
+                <tr onclick='window.document.location="{% url 'leases:vm_detail' pk=vm.pk %}";'>
+                    <th scope="row"><a href="{% url 'leases:vm_detail' pk=vm.pk %}">#{{ vm.pk }}</a></th>
+                    {% if user.is_superuser %}<td>{{ vm.author }}</td>{%  endif %}
+                    <td>{{ vm.get_core_count_display }}</td>
+                    <td>{{ vm.get_memory_size_display }}</td>
+                    <td>{{ vm.get_disk_size_display }}</td>
+                    <td>{{ vm.created_date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+            <div>
+                <a class="btn btn-primary" href={% url 'leases:vm_new' %} role="button">New VM</a>
+            </div>
+{% endblock content %}

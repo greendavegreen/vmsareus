@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+T{% block content %}
+
+    <div class="spacer">&nbsp</div>
+    <div class="row">
+        <div class="col-sm-6"><h1>Vm #{{ vm.pk }}</h1></div>
+    </div>
+    <div class="row">
+            <div class="col-sm-6 offset-sm-1">CPU: {{ vm.get_core_count_display }}</div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8 offset-sm-1">Created: {{ vm.created_date | date:"E d Y" }}</div>
+    </div>
+
+    <div class="spacer">&nbsp</div>
+    <div class="spacer">&nbsp</div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <h1>Status</h1>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="jumbotron">
+            <p>Address:127.0.0.1</p>
+            <p>Here are some instructions regarding how to login to your system:</p>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}
