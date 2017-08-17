@@ -1,15 +1,82 @@
 {% extends "base.html" %}
 T{% block content %}
-
+    <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Delete VM
+                </div>
+                <div class="modal-body">
+                    <p>This operation will delete all data associated with this VM.</p>
+                    <p>This cannot be undone.  Do you wish to continue?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-danger btn-ok">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="spacer">&nbsp</div>
     <div class="row">
-        <div class="col-sm-6"><h1>Vm #{{ vm.pk }}</h1></div>
+            <div class="col-12 col-sm-6 push-sm-6 pull-sm-0">
+                <button class="btn btn-danger" data-href="/delete.php?id=54" data-toggle="modal" data-target="#confirm-delete">
+                    Delete this VM
+                </button>
+            </div>
+            <div class="col-12 pull-sm-6 col-sm-6 push-sm-0 col-lg-5 col-xl-4">
+                <div class="row">
+                    <div class="col-6 "><h1>Vm</h1></div>
+                </div>
+                <div class="row">
+                    <div class="col-3 col-sm-2 offset-1">
+                        CPU:
+                    </div>
+                    <div class="col-7 ">
+                        {{ vm.get_core_count_display }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 col-sm-2 offset-1">
+                        Mem:
+                    </div>
+                    <div class="col-7 ">
+                        {{ vm.get_memory_size_display }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 col-sm-2 offset-1">
+                        Owner:
+                    </div>
+                    <div class="col-4 ">
+                        {{ vm.author }}
+                    </div>
+                </div>
+                <div class="spacer">&nbsp</div>
+
+            </div>
+
     </div>
     <div class="row">
-            <div class="col-sm-6 offset-sm-1">CPU: {{ vm.get_core_count_display }}</div>
+
+                    <div class="col-3 col-sm-2 ">
+                        Born:
+                    </div>
+
+                    <div class="col-9">
+                        {{ vm.created_date | date:"E d Y" }}
+                    </div>
     </div>
+
     <div class="row">
-        <div class="col-sm-8 offset-sm-1">Created: {{ vm.created_date | date:"E d Y" }}</div>
+                    <div class="col-3 col-sm-2 ">
+                    </div>
+
+                    <div class="col-9">
+                        <p>This machine will be subject to termination after 1 month of use.</p>
+                    </div>
+
+
     </div>
 
     <div class="spacer">&nbsp</div>

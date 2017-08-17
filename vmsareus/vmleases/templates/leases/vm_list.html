@@ -2,10 +2,9 @@
 {% block title %}Vms{% endblock %}
 
 
-author = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    core_count = models.IntegerField(choices=CORES)
-    memory_size = models.IntegerField(choices=MEMORIES)
-    disk_size = models.IntegerField(choices=DISKS)
+{#author = models.ForeignKey('users.User', on_delete=models.CASCADE)#}
+{#core_count = models.IntegerField(choices=CORES)#}
+{#memory_size = models.IntegerField(choices=MEMORIES)#}
 
 
 {% block content %}
@@ -19,7 +18,6 @@ author = models.ForeignKey('users.User', on_delete=models.CASCADE)
                     {% if user.is_superuser %}<th>Owner</th>{%  endif %}
                     <th>CPU</th>
                     <th>Memory</th>
-                    <th>Disk</th>
                     <th>Created</th>
                 </tr>
             </thead>
@@ -30,7 +28,6 @@ author = models.ForeignKey('users.User', on_delete=models.CASCADE)
                     {% if user.is_superuser %}<td>{{ vm.author }}</td>{%  endif %}
                     <td>{{ vm.get_core_count_display }}</td>
                     <td>{{ vm.get_memory_size_display }}</td>
-                    <td>{{ vm.get_disk_size_display }}</td>
                     <td>{{ vm.created_date }}</td>
                 </tr>
                 {% endfor %}

@@ -16,7 +16,7 @@ APPS_DIR = ROOT_DIR.path('vmsareus')
 env = environ.Env()
 
 # .env file, should load only in development environment
-READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=False)
+READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=True)
 
 if READ_DOT_ENV_FILE:
     # Operating System Environment variables have precedence over variables defined in the .env file,
@@ -272,8 +272,28 @@ LOGIN_URL = 'account_login'
 AUTOSLUG_SLUGIFY_FUNCTION = 'slugify.slugify'
 
 
+########## CELERY
+INSTALLED_APPS += ['vmsareus.taskapp.celery.CeleryConfig']
+BROKER_URL = env('CELERY_BROKER_URL', default='redis://')
+if BROKER_URL == 'django://':
+    CELERY_RESULT_BACKEND = 'redis://'
+else:
+    CELERY_RESULT_BACKEND = BROKER_URL
+########## END CELERY
+
 # Location of root django.contrib.admin URL, use {% url 'admin:index' %}
 ADMIN_URL = r'^admin/'
 
 # Your common stuff: Below this line define 3rd party library settings
 # ------------------------------------------------------------------------------
+VCENTER_HOST = env('VCENTER_HOST', default=None)
+VCENTER_USER = env('VCENTER_USER', default=None)
+VCENTER_PASSWORD = env('VCENTER_PASSWORD', default=None)
+VCENTER_PORT = env('VCENTER_PORT', default=None)
+
+VCENTER_DATACENTER = env('VCENTER_DATACENTER', default=None)
+VCENTER_FOLDER = env('VCENTER_FOLDER', default=None)
+
+VCENTER_DATASTORE = env('VCENTER_DATASTORE', default=None)
+VCENTER_CLUSTER = env('VCENTER_CLUSTER', default=None)
+VCENTER_POOL = env('VCENTER_POOL', default=None)

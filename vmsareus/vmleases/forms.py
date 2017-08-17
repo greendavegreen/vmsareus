@@ -6,4 +6,4 @@ class VmForm(forms.ModelForm):
 
     class Meta:
         model = Vm
-        fields = ('core_count', 'memory_size', 'disk_size')
+        fields = ('core_count', 'memory_size', 'host_os')

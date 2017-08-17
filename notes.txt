@@ -1,0 +1,82 @@
+create virtualenv with python 3.5 base
+pip install coookiecutter
+cookiecutter https://github.com/pydanny/cookiecutter-django
+
+pip install -r requirements/local.txt
+
+
+docker run --name local-postgres9.3.6 -p 5432:5432 -e POSTGRES_PASSWORD=mypassword -d  postgres:9.3.6
+
+use console to log into postgres the first time:
+
+psql -h localhost -p 5432  -U postgres --password
+mypassword
+
+create role djangogirls with CREATEDB LOGIN PASSWORD 'mypassword';
+create database djangogirls;
+
+python manage.py migrate
+
+don't forget to migrate and create superuser
+
+
+
+operations on app:
+python manage.py startapp blog
+ - moved directory into djgirls folder (not top level)
+
+
+added code to blog model:
+class Post(models.Model):
+    author = models.ForeignKey('users.User')
+
+then generate migration
+- makemigrations blog
+
+checkt out the sql
+- sqlmigrate blog 0001
+
+
+- added admin code to register blog in admin.py
+- create superuser
+
+import blog urls into global collection inside of /config
+
+created urls.py inside of blog (referred to from global url config)
+reference view that dhttoesn't exist yet.
+then create it
+
+the ORM is alive now:
+from djangogirls.blog.models import Post
+Post.objects.all()
+Post.objects.filter(title__contains='title')
+Post.objects.filter(published_date__lte=timezone.now())
+Post.objects.order_by('-created_date')
+Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
+
+
+http://devhelp.lebanon.cd-adapco.com/secure/attachment/10140/setupws.sh
+
+redis/celery work queue setup:
+
+docker run --name some-redis -p 6379:6379 -d redis
+
+celery -A vmsareus.taskapp worker -l info
+
+
+
+
+
+create_vm('ubuminitemplate.v1', 'davegtest', 'firstly', 'datastore1', 'Lab')
+
+
+-s aberdeen
+-u david.green@cd-adapco.com
+-p fluxu$89
+-v clonetestv1
+--template ubuminitemplate.v1
+--datacenter-name Lebanon
+--vm-folder davegtest
+--datastore-name datastore1
+--cluster-name Lab
+
