@@ -13,6 +13,7 @@ from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 from .tools import tasks
 
+
 if not settings.configured:
     # set the default Django settings module for the 'celery' program.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')  # pragma: no cover
@@ -108,7 +109,13 @@ def confirm_folder():
             print("error locating or creating folder")
 
 @app.task
-def create_vm(template_name, vm_name):
+def fill_lease(id):
+#    lease = Vm.objects.get(pk=id)
+    #print(lease.get_vm_state_display())
+    pass
+
+@app.task
+def create_vm(template_name, cpu_count, mem_gigs, vm_name):
     if validate_config():
         print("valid config")
     else:
@@ -142,8 +149,8 @@ def create_vm(template_name, vm_name):
         clonespec.location = relospec
 
         config = vim.vm.ConfigSpec()
-        config.numCPUs = 12
-        config.memoryMB = 16384
+        config.numCPUs = cpu_count
+        config.memoryMB = mem_gigs * 1024
         config.name = vm_name
         clonespec.config = config
 
@@ -153,6 +160,11 @@ def create_vm(template_name, vm_name):
 
         tasks.wait_for_tasks(si, [task])
         print("Clone Complete.")
+
+        if task.info.state == 'success':
+            print() # mark the item done
+        else:
+            print ("there was an error")
 
         print(task.info.state)
         print(task.info.key)

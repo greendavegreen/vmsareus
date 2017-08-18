@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 
 from vmsareus.vmleases.forms import VmForm
+
+from vmsareus.taskapp import celery
 from .models import Vm
 
 
@@ -33,6 +35,7 @@ def vm_new(request):
             vm = form.save(commit=False)
             vm.author = request.user
             vm.save()
+            celery.fill_lease(vm.pk)
             return redirect('leases:vm_detail', pk=vm.pk)
     else:
         form = VmForm()
