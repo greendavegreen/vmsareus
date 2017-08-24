@@ -125,94 +125,102 @@ def confirm_folder():
         else:
             print("error locating or creating folder")
 
+
 @app.task
 def fill_lease(id):
     from ..vmleases.models import Vm
-
-    if validate_config():
-        print("valid config")
-    else:
-        print("invalid config")
-
     try:
         obj = Vm.objects.get(pk=id)
-        name = 'dev-vm-{}-{}'.format(obj.author.username, int(time.time()))
-        print(name)
-        create_vm('ubuminitemplate.v1', 1, 4, name)
 
-        obj.vm_state = 'r'
-        obj.save()
-        print('VM created:{} status {}'.format(name, obj.vm_state))
+        if validate_config():
+            obj.vm_state = 'c'
+            obj.save()
+
+            name = 'dev-vm-{}-{}'.format(obj.author.username, int(time.time()))
+            if create_vm('ubuminitemplate.v1', 1, 4, name):
+                obj.vm_state = 'r'
+                obj.save()
+                print('VM created:{} status {}'.format(name, obj.vm_state))
+            else:
+                print('call to vm creation failed')
+                obj.vm_state = 'a'
+                obj.save()
+        else:
+            print("invalid config")
+            obj.vm_state = 'a'
+            obj.save()
     except ObjectDoesNotExist:
         print('VM does not exist: {0!s}'.format(pk))
     pass
 
+
 @app.task
 def create_vm(template_name, cpu_count, mem_gigs, vm_name):
     if validate_config():
-        print("valid config")
-    else:
-        print("invalid config")
+        si = connect()
+        if si:
+            # print("connection made to vcenter")
+            atexit.register(Disconnect, si)
+            content = si.RetrieveContent()
 
-    si = connect()
+            datastore = get_obj(content, [vim.Datastore], settings.VCENTER_DATASTORE)
+            folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
+            cluster = get_obj(content, [vim.ClusterComputeResource], settings.VCENTER_CLUSTER)
 
-    if si:
-        print("connection made to vcenter")
-        atexit.register(Disconnect, si)
-        content = si.RetrieveContent()
+            # resource pools are optional
+            if settings.VCENTER_POOL:
+                resource_pool = get_obj(content, [vim.ResourcePool], settings.VCENTER_POOL)
+            else:
+                resource_pool = cluster.resourcePool
 
-        datastore = get_obj(content, [vim.Datastore], settings.VCENTER_DATASTORE)
-        folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
-        cluster = get_obj(content, [vim.ClusterComputeResource], settings.VCENTER_CLUSTER)
+            template = get_obj(content, [vim.VirtualMachine], template_name)
 
-        # resource pools are optional
-        if settings.VCENTER_POOL:
-            resource_pool = get_obj(content, [vim.ResourcePool], settings.VCENTER_POOL)
-        else:
-            resource_pool = cluster.resourcePool
+            clonespec = vim.vm.CloneSpec()
+            clonespec.powerOn = True
 
-        template = get_obj(content, [vim.VirtualMachine], template_name)
+            relospec = vim.vm.RelocateSpec()
+            relospec.datastore = datastore
+            relospec.pool = resource_pool
+            clonespec.location = relospec
 
-        clonespec = vim.vm.CloneSpec()
-        clonespec.powerOn = True
+            config = vim.vm.ConfigSpec()
+            config.numCPUs = cpu_count
+            config.memoryMB = mem_gigs * 1024
+            config.name = vm_name
+            clonespec.config = config
 
-        relospec = vim.vm.RelocateSpec()
-        relospec.datastore = datastore
-        relospec.pool = resource_pool
-        clonespec.location = relospec
+            # print("cloning VM...")
+            task = template.Clone(folder=folder, name=vm_name, spec=clonespec)
+            # print("clone call returned, now waiting for task to complete.")
 
-        config = vim.vm.ConfigSpec()
-        config.numCPUs = cpu_count
-        config.memoryMB = mem_gigs * 1024
-        config.name = vm_name
-        clonespec.config = config
+            tasks.wait_for_tasks(si, [task])
+            # print("Clone Complete.")
 
-        print("cloning VM...")
-        task = template.Clone(folder=folder, name=vm_name, spec=clonespec)
-        print("clone call returned, now waiting for task to complete.")
-
-        tasks.wait_for_tasks(si, [task])
-        print("Clone Complete.")
-
-        result = (task.info.state == 'success')
-
-        print(task.info.state)
-        print(task.info.key)
-        print(task.info.descriptionId)
-        if isinstance(task.info.reason, vim.TaskReasonUser):
-            print(task.info.reason.userName)
-        summary = task.info.result.summary
-        print("Name       : ", summary.config.name)
-        print("Path       : ", summary.config.vmPathName)
-        print("Guest      : ", summary.config.guestFullName)
-        print("State      : ", summary.runtime.powerState)
-        if summary.guest is not None:
-            ip = summary.guest.ipAddress
-            if ip:
-                print("IP         : ", ip)
+            result = (task.info.state == 'success')
+            # print_result(task)
+            return result
     else:
         print("Could not connect to the specified host using specified "
               "username and password")
+
+    return False
+
+
+def print_result(task):
+    print(task.info.state)
+    print(task.info.key)
+    print(task.info.descriptionId)
+    if isinstance(task.info.reason, vim.TaskReasonUser):
+        print(task.info.reason.userName)
+    summary = task.info.result.summary
+    print("Name       : ", summary.config.name)
+    print("Path       : ", summary.config.vmPathName)
+    print("Guest      : ", summary.config.guestFullName)
+    print("State      : ", summary.runtime.powerState)
+    if summary.guest is not None:
+        ip = summary.guest.ipAddress
+        if ip:
+            print("IP         : ", ip)
 
 
 @app.task
