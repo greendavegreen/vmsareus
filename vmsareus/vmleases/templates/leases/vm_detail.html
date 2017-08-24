@@ -19,82 +19,125 @@ T{% block content %}
     </div>
     <div class="spacer">&nbsp</div>
     <div class="row">
-            <div class="col-12 col-sm-6 push-sm-6 pull-sm-0">
+            <div class="col-12 col-sm-1 push-sm-8 pull-sm-0">
                 <button class="btn btn-danger" data-href="{% url 'leases:vm_remove' pk=vm.pk %}" data-toggle="modal" data-target="#confirm-delete">
                     Delete this VM
                 </button>
             </div>
-            <div class="col-12 pull-sm-6 col-sm-6 push-sm-0 col-lg-5 col-xl-4">
+            <div class="col-12 pull-sm-1 col-sm-8 push-sm-0 col-lg-5 col-xl-4">
                 <div class="row">
-                    <div class="col-6 "><h1>Vm</h1></div>
+                    <div class="col-6 "><h1>Lease</h1></div>
                 </div>
                 <div class="row">
-                    <div class="col-3 col-sm-2 offset-1">
+                    <div class="col-4 col-sm-4 text-right">
                         CPU:
                     </div>
-                    <div class="col-7 ">
+                    <div class="col-8 ">
                         {{ vm.get_core_count_display }}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 col-sm-2 offset-1">
-                        Mem:
+                    <div class="col-4 col-sm-4 text-right">
+                        Memory:
                     </div>
-                    <div class="col-7 ">
+                    <div class="col-8 ">
                         {{ vm.get_memory_size_display }}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 col-sm-2 offset-1">
+                    <div class="col-4 col-sm-4 text-right">
                         Owner:
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-8 ">
                         {{ vm.author }}
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-4 col-sm-4 text-right">
+                        Born:
+                    </div>
+                    <div class="col-8 ">
+                        {{ vm.created_date | date:"E d Y" }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4 col-sm-4 text-right">
+
+                    </div>
+                    <div class="col-8 ">
+                        <p>This machine will be subject to termination after 1 month of use.</p>
+                    </div>
+                </div>
+
                 <div class="spacer">&nbsp</div>
 
             </div>
 
     </div>
-    <div class="row">
-
-                    <div class="col-3 col-sm-2 ">
-                        Born:
-                    </div>
-
-                    <div class="col-9">
-                        {{ vm.created_date | date:"E d Y" }}
-                    </div>
-    </div>
-
-    <div class="row">
-                    <div class="col-3 col-sm-2 ">
-                    </div>
-
-                    <div class="col-9">
-                        <p>This machine will be subject to termination after 1 month of use.</p>
-                    </div>
-
-
-    </div>
-
-    <div class="spacer">&nbsp</div>
-    <div class="spacer">&nbsp</div>
-
-    <div class="row">
-        <div class="col-sm-6">
-            <h1>Status</h1>
+    {% if vm.vm_state == 'a' %}
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Error occurred during creation of VM.  Please notify DevOps.</h3>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
-
-    <div class="row">
-        <div class="jumbotron">
-            <p>Address:127.0.0.1</p>
-            <p>Here are some instructions regarding how to login to your system:</p>
+    {% if vm.vm_state == 'q' %}
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Awaiting vmsAreUs service.</h3>
+            </div>
         </div>
+    {% endif %}
+
+    {% if vm.vm_state == 'c' %}
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Cluster is creating VM.</h3>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if vm.vm_state == 'r' %}
+
+
+        <div class="row">
+            <div class="col-6 "><h1>VM</h1></div>
+        </div>
+
+        <div class="row rowg">
+            <div class="col-12 "><p>{{ vm.vm_name }}</p></div>
+        </div>
+        <div class="row rowg">
+            <div class="col-12 col-sm-8 col-lg-5 col-xl-4">
+
+                <div class="row">
+                    <div class="col-4 col-sm-4 text-right">
+                        GuestOS:
+                    </div>
+                    <div class="col-8 ">
+                        {{ guest_os }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4 col-sm-4 text-right">
+                        Power:
+                    </div>
+                    <div class="col-8 ">
+                        {{ guest_power }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4 col-sm-4 text-right">
+                        IPAddress:
+                    </div>
+                    <div class="col-8 ">
+                        {{ ip }}
+                    </div>
+                </div>
+            </div>
     </div>
-    </div>
+    {% endif %}
+
 
 {% endblock %}

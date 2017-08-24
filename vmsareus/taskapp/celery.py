@@ -199,7 +199,7 @@ def create_vm(template_name, cpu_count, mem_gigs, vm_name):
             # print("Clone Complete.")
 
             result = (task.info.state == 'success')
-            # print_result(task)
+            print_result(task)
             return result
     else:
         print("Could not connect to the specified host using specified "
@@ -257,10 +257,53 @@ def delete_vm(vm_name):
         else:
             print("could not locate VM named: " + vm_name)
 
+@app.task
+def get_vm_info(vm_name):
+    if validate_config():
+        print("valid config")
+    else:
+        print("invalid config")
+        return None
 
+    si = connect()
 
+    if si:
+        print("connection made to vcenter")
+        atexit.register(Disconnect, si)
+        content = si.RetrieveContent()
 
+        vm = get_obj(content, [vim.VirtualMachine], vm_name)
+        if vm:
+            return {'os': vm.summary.config.guestFullName,
+                    'power': vm.summary.runtime.powerState}
 
+    return None
+
+@app.task
+def get_ip(vm_name):
+    if validate_config():
+        print("valid config")
+    else:
+        print("invalid config")
+        return None
+
+    si = connect()
+
+    if si:
+        print("connection made to vcenter")
+        atexit.register(Disconnect, si)
+        content = si.RetrieveContent()
+
+        vm = get_obj(content, [vim.VirtualMachine], vm_name)
+        if vm:
+            if vm.summary.guest is not None:
+                print('ip: {}'.format(vm.summary.guest.ipAddress))
+                return vm.summary.guest.ipAddress
+            else:
+                print('ip not assigned')
+        else:
+            print('vm not findable: {}'.format(vm_name))
+    return None
 
 @app.task
 def task_list():
