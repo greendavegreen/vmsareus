@@ -33,6 +33,8 @@ class Vm(models.Model):
     host_os = models.CharField(max_length=32, choices=OS_CHOICES, default='ubumini')
 
     vm_state = models.CharField(max_length=1, choices=STATES, default='q')
+    vm_name = models.CharField(max_length=64, default='')
+
     created_date = models.DateTimeField(default=timezone.now)
     expires_date = models.DateTimeField(default=get_deadline)
 

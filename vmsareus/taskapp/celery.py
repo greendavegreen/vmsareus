@@ -130,6 +130,7 @@ def confirm_folder():
 def fill_lease(id):
     from ..vmleases.models import Vm
     try:
+        time.sleep(5)
         obj = Vm.objects.get(pk=id)
 
         if validate_config():
@@ -139,6 +140,7 @@ def fill_lease(id):
             name = 'dev-vm-{}-{}'.format(obj.author.username, int(time.time()))
             if create_vm('ubuminitemplate.v1', 1, 4, name):
                 obj.vm_state = 'r'
+                obj.vm_name = name
                 obj.save()
                 print('VM created:{} status {}'.format(name, obj.vm_state))
             else:
@@ -150,7 +152,7 @@ def fill_lease(id):
             obj.vm_state = 'a'
             obj.save()
     except ObjectDoesNotExist:
-        print('VM does not exist: {0!s}'.format(pk))
+        print('VM does not exist: {0!s}'.format(id))
     pass
 
 
@@ -239,22 +241,24 @@ def delete_vm(vm_name):
         content = si.RetrieveContent()
 
         vm = get_obj(content, [vim.VirtualMachine], vm_name)
-        if vm is None:
+        if vm:
+            print("Found: {0}".format(vm.name))
+            print("The current powerState is: {0}".format(vm.runtime.powerState))
+            if format(vm.runtime.powerState) == "poweredOn":
+                print("Attempting to power off {0}".format(vm.name))
+                task = vm.PowerOffVM_Task()
+                tasks.wait_for_tasks(si, [task])
+                print("{0}".format(task.info.state))
+
+            print("Destroying VM from vSphere.")
+            task = vm.Destroy_Task()
+            tasks.wait_for_tasks(si, [task])
+            print("Done.")
+        else:
             print("could not locate VM named: " + vm_name)
 
 
-        print("Found: {0}".format(vm.name))
-        print("The current powerState is: {0}".format(vm.runtime.powerState))
-        if format(vm.runtime.powerState) == "poweredOn":
-            print("Attempting to power off {0}".format(vm.name))
-            task = vm.PowerOffVM_Task()
-            tasks.wait_for_tasks(si, [task])
-            print("{0}".format(task.info.state))
 
-        print("Destroying VM from vSphere.")
-        task = vm.Destroy_Task()
-        tasks.wait_for_tasks(si, [task])
-        print("Done.")
 
 
 

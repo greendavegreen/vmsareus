@@ -20,7 +20,7 @@ T{% block content %}
     <div class="spacer">&nbsp</div>
     <div class="row">
             <div class="col-12 col-sm-6 push-sm-6 pull-sm-0">
-                <button class="btn btn-danger" data-href="/delete.php?id=54" data-toggle="modal" data-target="#confirm-delete">
+                <button class="btn btn-danger" data-href="{% url 'leases:vm_remove' pk=vm.pk %}" data-toggle="modal" data-target="#confirm-delete">
                     Delete this VM
                 </button>
             </div>

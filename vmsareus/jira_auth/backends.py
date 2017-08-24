@@ -73,8 +73,8 @@ class JiraBackend(ModelBackend):
         user.is_active = True
         # auto-superuser goodness goes here once I figure things out
         # if 'superuser' in crowd_config and crowd_config['superuser']:
-        user.is_superuser = True
-        user.is_staff = True
+        #user.is_superuser = True
+        #user.is_staff = True
         if user_data:
             user.name = user_data['displayName']
 

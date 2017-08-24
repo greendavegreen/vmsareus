@@ -5,7 +5,7 @@ from vmsareus.vmleases.forms import VmForm
 
 from vmsareus.taskapp import celery
 from .models import Vm
-
+import time
 
 # Create your views here.
 
@@ -24,6 +24,7 @@ def vm_list(request):
 @login_required
 def vm_detail(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
+
     return render(request, 'leases/vm_detail.html', {'vm': vm})
 
 
@@ -35,7 +36,8 @@ def vm_new(request):
             vm = form.save(commit=False)
             vm.author = request.user
             vm.save()
-            celery.fill_lease(vm.pk)
+            #print('filling {}'.format(vm.pk))
+            celery.fill_lease.delay(vm.pk)
             return redirect('leases:vm_detail', pk=vm.pk)
     else:
         form = VmForm()
@@ -54,3 +56,10 @@ def vm_edit(request, pk):
     else:
         form = VmForm(instance=vm)
     return render(request, 'leases/vm_edit.html', {'form': form})
+
+@login_required
+def vm_remove(request, pk):
+    vm = get_object_or_404(Vm, pk=pk)
+    celery.delete_vm.delay(vm.vm_name)
+    vm.delete()
+    return redirect('leases:vm_list')
