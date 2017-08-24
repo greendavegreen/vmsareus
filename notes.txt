@@ -80,3 +80,7 @@ create_vm('ubuminitemplate.v1', 'davegtest', 'firstly', 'datastore1', 'Lab')
 --datastore-name datastore1
 --cluster-name Lab
 
+
+
+ /usr/bin/node /home/davidg/PycharmProjects/vmsareus/node_modules/gulp/bin/gulp.js --color --gulpfile /home/davidg/PycharmProjects/vmsareus/gulpfile.js default
+

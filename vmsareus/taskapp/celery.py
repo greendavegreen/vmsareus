@@ -9,6 +9,7 @@ import time
 from celery import Celery
 from django.apps import apps, AppConfig
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 from .tools import tasks
@@ -47,7 +48,10 @@ class CeleryConfig(AppConfig):
 
 @app.task(bind=True)
 def debug_task(self):
+    from ..vmleases.models import Vm
+
     print('Request: {0!r}'.format(self.request))  # pragma: no cover
+
 
 
 def validate_config():
@@ -90,6 +94,19 @@ def find_or_create_folder(content, foldername):
         return None
 
 @app.task
+def update_vm_state(pk):
+    from ..vmleases.models import Vm
+    try:
+        obj = Vm.objects.get(pk=pk)
+        print(obj.vm_state)
+        obj.vm_state = 'r'
+        obj.save()
+        print(obj.vm_state)
+    except ObjectDoesNotExist:
+        print('VM does not exist: {0!s}'.format(pk))
+
+
+@app.task
 def confirm_folder():
     if validate_config():
         print("valid config")
@@ -110,8 +127,24 @@ def confirm_folder():
 
 @app.task
 def fill_lease(id):
-#    lease = Vm.objects.get(pk=id)
-    #print(lease.get_vm_state_display())
+    from ..vmleases.models import Vm
+
+    if validate_config():
+        print("valid config")
+    else:
+        print("invalid config")
+
+    try:
+        obj = Vm.objects.get(pk=id)
+        name = 'dev-vm-{}-{}'.format(obj.author.username, int(time.time()))
+        print(name)
+        create_vm('ubuminitemplate.v1', 1, 4, name)
+
+        obj.vm_state = 'r'
+        obj.save()
+        print('VM created:{} status {}'.format(name, obj.vm_state))
+    except ObjectDoesNotExist:
+        print('VM does not exist: {0!s}'.format(pk))
     pass
 
 @app.task
@@ -161,10 +194,7 @@ def create_vm(template_name, cpu_count, mem_gigs, vm_name):
         tasks.wait_for_tasks(si, [task])
         print("Clone Complete.")
 
-        if task.info.state == 'success':
-            print() # mark the item done
-        else:
-            print ("there was an error")
+        result = (task.info.state == 'success')
 
         print(task.info.state)
         print(task.info.key)
