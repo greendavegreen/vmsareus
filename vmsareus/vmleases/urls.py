@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^vm/new/$', views.vm_new, name='vm_new'),
     url(r'^vm/(?P<pk>\d+)/edit/$', views.vm_edit, name='vm_edit'),
     url(r'^vm/(?P<pk>\d+)/remove/$', views.vm_remove, name='vm_remove'),
+    url(r'^vm/(?P<pk>\d+)/extend/$', views.vm_extend, name='vm_extend'),
 ]

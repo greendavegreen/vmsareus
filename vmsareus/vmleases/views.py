@@ -6,6 +6,7 @@ from vmsareus.vmleases.forms import VmForm
 from vmsareus.taskapp import celery
 from .models import Vm
 import time
+from dateutil.relativedelta import relativedelta
 
 # Create your views here.
 
@@ -73,3 +74,10 @@ def vm_remove(request, pk):
     celery.delete_vm.delay(vm.vm_name)
     vm.delete()
     return redirect('leases:vm_list')
+
+@login_required
+def vm_extend(request, pk):
+    vm = get_object_or_404(Vm, pk=pk)
+    vm.expires_date = vm.expires_date + relativedelta(months=1)
+    vm.save()
+    return redirect('leases:vm_detail', pk=vm.pk)
