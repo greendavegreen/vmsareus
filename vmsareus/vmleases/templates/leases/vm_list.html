@@ -10,6 +10,7 @@
 {% block content %}
 <div class="row">
     <div class="col-sm-12">
+    {%  if vms %}
         <h1><a href="{% url 'leases:vm_list' %}">{% if user.is_superuser %}Systemwide{% endif %} Leases</a></h1>
         <table class="table table-responsive table-hover">
             <thead class="thead-default">
@@ -33,6 +34,9 @@
                 {% endfor %}
             </tbody>
         </table>
+    {%  else  %}
+    <h3>You have no VMs.</h3>
+    {% endif %}
     </div>
 
 </div>

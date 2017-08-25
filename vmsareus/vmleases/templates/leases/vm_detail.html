@@ -18,7 +18,7 @@ T{% block content %}
         </div>
     </div>
     <div class="spacer">&nbsp</div>
-    <div class="row">
+    <div class="row ">
             <div class="col-12 col-sm-1 push-sm-8 pull-sm-0">
                 <button class="btn btn-danger" data-href="{% url 'leases:vm_remove' pk=vm.pk %}" data-toggle="modal" data-target="#confirm-delete">
                     Delete this VM
@@ -28,7 +28,7 @@ T{% block content %}
                 <div class="row">
                     <div class="col-6 "><h1>Lease</h1></div>
                 </div>
-                <div class="row">
+                <div class="row rowo">
                     <div class="col-4 col-sm-4 text-right">
                         CPU:
                     </div>
@@ -36,7 +36,7 @@ T{% block content %}
                         {{ vm.get_core_count_display }}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row rowo">
                     <div class="col-4 col-sm-4 text-right">
                         Memory:
                     </div>
@@ -44,15 +44,8 @@ T{% block content %}
                         {{ vm.get_memory_size_display }}
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-4 col-sm-4 text-right">
-                        Owner:
-                    </div>
-                    <div class="col-8 ">
-                        {{ vm.author }}
-                    </div>
-                </div>
-                <div class="row">
+
+                <div class="row rowo">
                     <div class="col-4 col-sm-4 text-right">
                         Born:
                     </div>
@@ -60,7 +53,7 @@ T{% block content %}
                         {{ vm.created_date | date:"E d Y" }}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row rowo">
                     <div class="col-4 col-sm-4 text-right">
 
                     </div>
