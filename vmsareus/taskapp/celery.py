@@ -1,19 +1,19 @@
+from __future__ import absolute_import
 
 import atexit
+import math
 import os
 import ssl
-
-import math
-
 import time
+
 from celery import Celery
 from django.apps import apps, AppConfig
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
-from .tools import tasks
 
+from .tools import tasks
 
 if not settings.configured:
     # set the default Django settings module for the 'celery' program.
