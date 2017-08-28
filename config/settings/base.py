@@ -112,8 +112,16 @@ MANAGERS = ADMINS
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgresql://vmsareus:chunkybacon@vmsareus.lebanon.cd-adapco.com/vmsareus'),
+'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env('DB_NAME', default='vmsareus'),
+        'USER': env('DB_USER', default='vmsareus'),
+        'PASSWORD': env('DB_PASSWORD', default=''),
+        'HOST': env('DB_HOST', default=''),
+        'PORT': env('DB_PORT', default='5432')
+    }
 }
+
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 
