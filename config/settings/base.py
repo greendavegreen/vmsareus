@@ -12,7 +12,7 @@ import environ
 ROOT_DIR = environ.Path(__file__) - 3  # (vmsareus/config/settings/base.py - 3 = vmsareus/)
 APPS_DIR = ROOT_DIR.path('vmsareus')
 
-ALLOWED_HOSTS = ['vmsareus.lebanon.cd-adapco.com', 'vmsareus']
+ALLOWED_HOSTS = ['vmsareus.lebanon.cd-adapco.com', 'vmsareus', '127.0.0.1']
 
 # Load operating system environment variables and then prepare to use them
 env = environ.Env()
