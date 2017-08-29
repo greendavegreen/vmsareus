@@ -29,6 +29,11 @@
   padding: 0;
   height: 50px; }
 
+.hspacer {
+  margin: 0;
+  padding: 0;
+  height: 25px; }
+
 .rowg {
   background-color: #f1f1f1; }
 

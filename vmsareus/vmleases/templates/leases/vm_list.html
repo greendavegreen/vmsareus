@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-lg-6 offset-lg-3 ">
     {%  if vms %}
         <h1><a href="{% url 'leases:vm_list' %}">{% if user.is_superuser %}Systemwide{% endif %} Leases</a></h1>
         <table class="table table-responsive table-hover">
@@ -40,7 +40,14 @@
     </div>
 
 </div>
-            <div>
-                <a class="btn btn-primary" href={% url 'leases:vm_new' %} role="button">New VM</a>
-            </div>
+    <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+            <hr>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+            <a class="btn btn-primary float-right" href={% url 'leases:vm_new' %} role="button">New VM</a>
+        </div>
+    </div>
 {% endblock content %}
