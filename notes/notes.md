@@ -202,7 +202,7 @@ I found [these instructions](https://www.digitalocean.com/community/tutorials/ho
         ```
         
     3. test the script
-        ```
+        ```  
         sudo /etc/init.d/celeryd start
         sudo /etc/init.d/celeryd status
         sudo /etc/init.d/celeryd stop

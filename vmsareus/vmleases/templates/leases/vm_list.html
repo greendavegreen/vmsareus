@@ -11,38 +11,38 @@
     <div class="row ">
         <div class="spacer">&nbsp</div>
     </div>
-<div class="row">
-    <div class="col-lg-6 offset-lg-3 ">
-    {%  if vms %}
-        <h1><a href="{% url 'leases:vm_list' %}">{% if user.is_superuser %}Systemwide{% endif %}Machine Leases</a></h1>
-        <table class="table table-responsive table-hover">
-            <thead class="thead-default">
-                <tr>
-                    <th>#</th>
-                    {% if user.is_superuser %}<th>Owner</th>{%  endif %}
-                    <th>CPU</th>
-                    <th>Memory</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for vm in vms %}
-                <tr onclick='window.document.location="{% url 'leases:vm_detail' pk=vm.pk %}";'>
-                    <th scope="row"><a href="{% url 'leases:vm_detail' pk=vm.pk %}">#{{ vm.pk }}</a></th>
-                    {% if user.is_superuser %}<td>{{ vm.author }}</td>{%  endif %}
-                    <td>{{ vm.get_core_count_display }}</td>
-                    <td>{{ vm.get_memory_size_display }}</td>
-                    <td>{{ vm.created_date }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {%  else  %}
-    <h3>You have no VMs.</h3>
-    {% endif %}
-    </div>
+    <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+        {%  if vms %}
+            <h1><a href="{% url 'leases:vm_list' %}">{% if user.is_superuser %}Systemwide{% endif %}Machine Leases</a></h1>
+            <table id="table1" class="table table-responsive table-hover">
+                <thead class="thead-default">
+                    <tr>
+                        <th>#</th>
+                        {% if user.is_superuser %}<th>Owner</th>{%  endif %}
+                        <th>CPU</th>
+                        <th>Memory</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vm in vms %}
+                    <tr onclick='window.document.location="{% url 'leases:vm_detail' pk=vm.pk %}";'>
+                        <th scope="row"><a href="{% url 'leases:vm_detail' pk=vm.pk %}">#{{ vm.pk }}</a></th>
+                        {% if user.is_superuser %}<td>{{ vm.author }}</td>{%  endif %}
+                        <td>{{ vm.get_core_count_display }}</td>
+                        <td>{{ vm.get_memory_size_display }}</td>
+                        <td>{{ vm.created_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {%  else  %}
+        <h3>You have no VMs.</h3>
+        {% endif %}
+        </div>
 
-</div>
+    </div>
     <div class="row">
         <div class="col-lg-6 offset-lg-3">
             <hr>
