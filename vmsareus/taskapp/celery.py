@@ -152,7 +152,7 @@ def fill_lease(id):
 
                 send_mail(
                     'Requested VM {} is ready!'.format(name),
-                    'Your VM has been cloned and can be found in {}'.format(full_url),
+                    'Your VM has been cloned! More info can be found at {}'.format(full_url),
                     'vmsareus@vmsareus.lebanon.cd-adapco.com',
                     [obj.author.email],
                     fail_silently=False,
