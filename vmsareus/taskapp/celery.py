@@ -10,6 +10,10 @@ from celery import Celery
 from django.apps import apps, AppConfig
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
+
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 
@@ -143,6 +147,16 @@ def fill_lease(id):
                 obj.vm_name = name
                 obj.save()
                 print('VM created:{} status {}'.format(name, obj.vm_state))
+                full_url = ''.join(['http://', get_current_site(None).domain, reverse('leases:vm_detail', args=[obj.id])])
+                print('sending mail to {} about {}'.format(obj.author.email, full_url))
+
+                send_mail(
+                    'Requested VM {} is ready!'.format(name),
+                    'Your VM has been cloned and can be found in {}'.format(full_url),
+                    'vmsareus@vmsareus.lebanon.cd-adapco.com',
+                    [obj.author.email],
+                    fail_silently=False,
+                )
             else:
                 print('call to vm creation failed')
                 obj.vm_state = 'a'

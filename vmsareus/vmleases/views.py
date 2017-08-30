@@ -1,6 +1,5 @@
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render, redirect
 
 from vmsareus.taskapp import celery
@@ -49,14 +48,6 @@ def vm_new(request):
             vm.save()
             #print('filling {}'.format(vm.pk))
 
-
-            send_mail(
-                'new VM requested',
-                'This note is to confirm that you requested this VM.',
-                'vmsareus@vmsareus.lebanon.cd-adapco.com',
-                ['david.green@cd-adapco.com'],
-                fail_silently=False,
-            )
             celery.fill_lease.delay(vm.pk)
             return redirect('leases:vm_detail', pk=vm.pk)
     else:
