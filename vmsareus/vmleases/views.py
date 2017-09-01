@@ -46,9 +46,10 @@ def vm_new(request):
             vm = form.save(commit=False)
             vm.author = request.user
             vm.save()
-            #print('filling {}'.format(vm.pk))
 
-            celery.fill_lease.delay(vm.pk)
+            # calculate values for template, cores, and memory from the submitted form
+
+            celery.fill_lease.delay(vm.pk, 'vmrus-win10', 12, 16)
             return redirect('leases:vm_detail', pk=vm.pk)
     else:
         form = VmForm()

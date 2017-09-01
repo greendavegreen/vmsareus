@@ -131,7 +131,7 @@ def confirm_folder():
 
 
 @app.task
-def fill_lease(id):
+def fill_lease(id, template_name, core_count, mem_gigs):
     from ..vmleases.models import Vm
     try:
         time.sleep(5)
@@ -142,7 +142,7 @@ def fill_lease(id):
             obj.save()
 
             name = 'dev-vm-{}-{}'.format(obj.author.username, int(time.time()))
-            if create_vm('ubuminitemplate.v1', 1, 4, name):
+            if create_cluster_vm(template_name, core_count, mem_gigs, name):
                 obj.vm_state = 'r'
                 obj.vm_name = name
                 obj.save()
@@ -169,6 +169,57 @@ def fill_lease(id):
         print('VM does not exist: {0!s}'.format(id))
     pass
 
+
+@app.task
+def create_cluster_vm(template_name, cpu_count, mem_gigs, vm_name):
+    if validate_config():
+        si = connect()
+        if si:
+            # print("connection made to vcenter")
+            atexit.register(Disconnect, si)
+            content = si.RetrieveContent()
+
+            template = get_obj(content, [vim.VirtualMachine], template_name)
+            pod = get_obj(content, [vim.StoragePod], settings.VCENTER_DATASTORE)
+            folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
+            resource_pool = get_obj(content, [vim.ResourcePool], settings.VCENTER_POOL)
+
+            cloneSpec = vim.vm.CloneSpec()
+            cloneSpec.powerOn = True
+
+            cloneSpec.config = vim.vm.ConfigSpec()
+            cloneSpec.config.name = vm_name
+            cloneSpec.config.numCPUs = cpu_count
+            cloneSpec.config.memoryMB = mem_gigs * 1024
+
+            cloneSpec.location = vim.vm.RelocateSpec()
+            cloneSpec.location.pool = resource_pool
+
+            storagespec = vim.storageDrs.StoragePlacementSpec()
+            storagespec.vm = template
+            storagespec.type = 'clone'
+            storagespec.folder = folder
+            storagespec.cloneSpec = cloneSpec
+            storagespec.cloneName = vm_name
+            storagespec.podSelectionSpec = vim.storageDrs.PodSelectionSpec()
+            storagespec.podSelectionSpec.storagePod = pod
+
+            rec = content.storageResourceManager.RecommendDatastores(storageSpec=storagespec)
+
+            rec_key = rec.recommendations[0].key
+            print("starting Apply")
+            task = content.storageResourceManager.ApplyStorageDrsRecommendation_Task(rec_key)
+
+            tasks.wait_for_tasks(si, [task])
+            # print("Clone Complete.")
+
+            result = (task.info.state == 'success')
+            print_result(task)
+            return result
+        else:
+            print("Could not connect to the specified host using specified username and password")
+
+    return False
 
 @app.task
 def create_vm(template_name, cpu_count, mem_gigs, vm_name):
@@ -215,12 +266,19 @@ def create_vm(template_name, cpu_count, mem_gigs, vm_name):
             result = (task.info.state == 'success')
             print_result(task)
             return result
-    else:
-        print("Could not connect to the specified host using specified "
-              "username and password")
+        else:
+            print("Could not connect to the specified host using specified "
+                  "username and password")
 
     return False
 
+def getsummary(result):
+    if hasattr(result, 'summary'):
+        return result.summary
+    elif hasattr(result, 'vm'):
+        return result.vm.summary
+    else:
+        return None
 
 def print_result(task):
     print(task.info.state)
@@ -228,7 +286,8 @@ def print_result(task):
     print(task.info.descriptionId)
     if isinstance(task.info.reason, vim.TaskReasonUser):
         print(task.info.reason.userName)
-    summary = task.info.result.summary
+
+    summary = getsummary(task.info.result)
     print("Name       : ", summary.config.name)
     print("Path       : ", summary.config.vmPathName)
     print("Guest      : ", summary.config.guestFullName)
