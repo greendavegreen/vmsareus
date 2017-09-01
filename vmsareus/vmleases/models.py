@@ -4,7 +4,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
 def get_deadline():
-    return timezone.now() + relativedelta(month=1)
+    return timezone.now() + relativedelta(months=1)
 
 class Vm(models.Model):
     CORES = (
