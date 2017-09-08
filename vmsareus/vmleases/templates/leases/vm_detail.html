@@ -97,36 +97,40 @@ T{% block content %}
         <div class="row rowg">
             <div class="col-lg-6 offset-lg-3">
                 <div class="row rowo">
-		    <div class="col-12">
+		            <div class="col-12">
                     	<p> Connect using a remote desktop client such as xfreerdp like this: </p>
-		    </div>
-		</div>
-		<div class="row rowo">
-		    <div class="col-12">
- 			<p>xfreerdp -u developer -g 1280x720 {{ ip }} </p>
-		    </div>
-		</div>
+		            </div>
+                </div>
                 <div class="row rowo">
-		    <div class="col-12">
-                    	<p> Your initial credentials on the machine are:</p>
-		    </div>
-		</div>
-		<div class="row rowo">
-	    	    <div class="col-4 col-sm-4 text-right">
-                        User:
-                </div>
-                    <div class="col-8 ">
-                       developer
+                    <div class="col-12">
+                    <p>xfreerdp -u developer -g 1280x720 {{ ip }} </p>
                     </div>
-        </div>
-		<div class="row rowo">
-       		    <div class="col-4 col-sm-4 text-right">
-                        password:
                 </div>
-                <div class="col-8 ">
-                  00ChangeThis
+                <div class="row rowo">
+                    <div class="col-12">
+                        <p> Your initial credentials on the machine are:</p>
+                    </div>
                 </div>
-        </div>
+                <div class="row rowo">
+                    <div class="col-4 col-sm-4 text-right">
+                            User:
+                    </div>
+                    <div class="col-8 ">
+                           developer
+                    </div>
+                </div>
+                <div class="row rowo">
+                    <div class="col-4 col-sm-4 text-right">
+                            password:
+                    </div>
+                    <div class="col-8 ">
+                      00ChangeThis
+                    </div>
+                </div>
+            </div>
+		</div>
+
+
     {% endif %}
 
     <div class="row rowg">

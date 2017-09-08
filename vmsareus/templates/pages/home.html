@@ -1,14 +1,26 @@
 {% extends "navless_base.html" %}
 {% block content %}
 
+    <div class="jumbotron hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 get-it">
+                    <p class="maintitle">VMs Are Us</p>
+                    <p class="subtitle">Dev VMs on demand.</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <section class="features">
         <div class="container">
             <div class="row">
-                <div class="col-lg-4">
-                    <h1>VMs Are Us </h1>
+                <div class="col-12 text-center">
                     <p>Create VMs when you need them to work on your feature branches.</p>
                 </div>
-                <div class="col-lg-8">
+
+            </div>
+            <div class="row">
+                <div class="col-12">
                     <div class="row icon-features">
                         <div class="col-4">
                             <img src="{{STATIC_URL}}images/cloud.svg" />
@@ -25,9 +37,21 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+    </section>
+
+    <section class="controls">
+        <div class="container">
             <div class="row">
-                <div class="col-12">
-                    <p><a class="btn btn-success btn-lg" role="button" href="#"> Login to get started</a></p>
+                <div class="col-md-4 offset-md-4">
+                    <a class="btn btn-success btn-lg btn-block" role="button" href="{% url 'leases:vm_list' %}">
+                        {% if request.user.is_authenticated %}
+                            Get Started
+                        {% else %}
+                            Login to get started
+                        {% endif %}
+                    </a>
                 </div>
             </div>
         </div>

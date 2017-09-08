@@ -86,7 +86,7 @@ $red: #b94a48;
 //table.table.table-hover {border: 1px solid black;}
 
 .hero {
-  background:url(../images/winBackDark.png) no-repeat center;
+  background:url(../images/dc2.png) no-repeat center;
   background-size:cover;
   border:none;
   margin-top:20px;
@@ -94,9 +94,9 @@ $red: #b94a48;
 
 @media (min-width:992px) {
   .hero .get-it {
-    text-align:right;
-    margin-top:80px;
-    padding-right:30px;
+    text-align:center;
+    margin-top:20px;
+
   }
 }
 
@@ -106,12 +106,23 @@ $red: #b94a48;
   }
 }
 
-.hero .get-it h1, .hero .get-it p {
+.hero .get-it p {
   color:#fff;
   text-shadow:2px 2px 3px rgba(0,0,0,0.3);
-  margin-bottom:40px;
+  margin-bottom:5px;
+
 }
 
+.hero .get-it p.maintitle {
+  font-family:'Open Sans', sans-serif;
+  font-weight: bold;
+  font-size:48px;
+}
+.hero .get-it p.subtitle {
+  font-family:serif;
+  font-size:24px;
+
+}
 .hero .get-it .btn {
   margin-left:10px;
   margin-bottom:10px;
@@ -134,4 +145,8 @@ section.features {
 
 .features .icon-features {
   margin-top:15px;
+}
+
+section.controls {
+  margin-top:20px;
 }
