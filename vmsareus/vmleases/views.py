@@ -24,14 +24,15 @@ def vm_list(request):
 @login_required
 def vm_detail(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
-    ip = celery.get_ip(vm.vm_name)
     info = celery.get_vm_info(vm.vm_name)
     if info:
         guest_os = info['os']
         guest_power = info['power']
+        ip = info['ip']
     else:
         guest_os = 'unknown'
         guest_power = 'unknown'
+        ip = 'unknkown'
     return render(request, 'leases/vm_detail.html', {'vm': vm,
                                                      'ip': ip,
                                                      'guest_os': guest_os,

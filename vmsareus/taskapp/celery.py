@@ -5,6 +5,7 @@ import math
 import os
 import ssl
 import time
+from datetime import datetime
 
 from celery import Celery
 from django.apps import apps, AppConfig
@@ -78,9 +79,12 @@ def connect():
     return si
 
 def get_obj(content, vimtype, name):
+    return get_obj_in_folder(content, content.rootFolder, vimtype, name)
+
+def get_obj_in_folder(content, folder, vimtype, name):
     obj = None
     container = content.viewManager.CreateContainerView(
-        content.rootFolder, vimtype, True)
+        folder, vimtype, True)
     for c in container.view:
         if c.name == name:
             obj = c
@@ -333,7 +337,8 @@ def delete_vm(vm_name):
 @app.task
 def get_vm_info(vm_name):
     if validate_config():
-        print("valid config")
+        # print("valid config")
+        pass
     else:
         print("invalid config")
         return None
@@ -341,41 +346,23 @@ def get_vm_info(vm_name):
     si = connect()
 
     if si:
-        print("connection made to vcenter")
         atexit.register(Disconnect, si)
         content = si.RetrieveContent()
-
-        vm = get_obj(content, [vim.VirtualMachine], vm_name)
-        if vm:
-            return {'os': vm.summary.config.guestFullName,
-                    'power': vm.summary.runtime.powerState}
-
-    return None
-
-@app.task
-def get_ip(vm_name):
-    if validate_config():
-        print("valid config")
-    else:
-        print("invalid config")
-        return None
-
-    si = connect()
-
-    if si:
-        print("connection made to vcenter")
-        atexit.register(Disconnect, si)
-        content = si.RetrieveContent()
-
-        vm = get_obj(content, [vim.VirtualMachine], vm_name)
+        folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
+        vm = get_obj_in_folder(content, folder, [vim.VirtualMachine], vm_name)
         if vm:
             if vm.summary.guest is not None:
-                print('ip: {}'.format(vm.summary.guest.ipAddress))
-                return vm.summary.guest.ipAddress
+                ip = vm.summary.guest.ipAddress
             else:
-                print('ip not assigned')
+                ip = 'not assigned'
+            return {'os': vm.summary.config.guestFullName,
+                    'power': vm.summary.runtime.powerState,
+                    'ip': ip}
         else:
-            print('vm not findable: {}'.format(vm_name))
+            print("could not find vm " + vm_name)
+    else:
+        print(datetime.now().strftime('%H:%M:%S ') + "connection to vcenter failed")
+
     return None
 
 @app.task

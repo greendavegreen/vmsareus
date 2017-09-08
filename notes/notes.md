@@ -162,8 +162,31 @@ I found [these instructions](https://www.digitalocean.com/community/tutorials/ho
     WSGIDaemonProcess vmsareus python-path=/var/app/current/vmsareus:/var/app/current/vmsareus_env/lib/python2.7/site-packages
     WSGIProcessGroup vmsareus
     WSGIScriptAlias / /var/app/current/vmsareus/config/wsgi.py
+10. turn off firewall
+   ```
+    sudo systemctl disable firewalld
+   ```
+11. disable selinux
+    ```
+    sudo vim /etc/sysconfig/selinux
+    
+    change value of SELINUX to disabled thus:
+    
+    # This file controls the state of SELinux on the system.
+    # SELINUX= can take one of these three values:
+    #     enforcing - SELinux security policy is enforced.
+    #     permissive - SELinux prints warnings instead of enforcing.
+    #     disabled - No SELinux policy is loaded.
+    SELINUX=disabled
+    # SELINUXTYPE= can take one of these two values:
+    #     targeted - Targeted processes are protected,
+    #     minimum - Modification of targeted policy. Only selected processes are protected. 
+    #     mls - Multi Level Security protection.
+    SELINUXTYPE=targeted 
+    ```
+    
+12. daemonize celery
 
-10. daemonize celery
     1. get DEFAULT init.d script
         ```
         sudo wget https://raw.githubusercontent.com/celery/celery/master/extra/generic-init.d/celeryd
@@ -209,4 +232,4 @@ I found [these instructions](https://www.digitalocean.com/community/tutorials/ho
         
         # if it is good to go
         sudo systemctl enable celeryd
-        ```
+     
