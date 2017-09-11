@@ -148,10 +148,11 @@ I found [these instructions](https://www.digitalocean.com/community/tutorials/ho
 9. edit ```/etc/httpd/conf.d/django.conf``` to contain:
 
     ```
-    Alias /static /var/app/current/vmsareus/vmsareus/static
-    <Directory "/var/app/current/vmsareus/vmsareus/static">
-        Require all granted
+    Alias /static /var/app/current/vmsareus/staticfiles
+    <Directory "/var/app/current/vmsareus/staticfiles">
+            Require all granted
     </Directory>
+
     
     <Directory "/var/app/current/vmsareus/config">
         <Files "wsgi.py">
