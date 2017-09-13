@@ -90,3 +90,19 @@ section.features {
 
 section.controls {
   margin-top: 20px; }
+
+.border-top-1 {
+  border-style: solid;
+  border-radius: 30px;
+  /*border-bottom:1px;*/
+  margin: 5px 5px;
+  padding: 10px;
+  background-color: #e4f1eb; }
+
+div.attrSet {
+  margin-top: 20px; }
+
+p.attrVal, p.attrTitle {
+  font-size: 28.8px;
+  font-size: 1.8rem;
+  margin-top: -10px; }

@@ -1,56 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Vms{% endblock %}
 
-
-{#author = models.ForeignKey('users.User', on_delete=models.CASCADE)#}
-{#core_count = models.IntegerField(choices=CORES)#}
-{#memory_size = models.IntegerField(choices=MEMORIES)#}
-
-
 {% block content %}
     <div class="row ">
         <div class="spacer">&nbsp</div>
     </div>
     <div class="row">
-        <div class="col-lg-6 offset-lg-3">
-        {%  if vms %}
-            <h1><a href="{% url 'leases:vm_list' %}">{% if user.is_superuser %}Systemwide{% endif %}Machine Leases</a></h1>
-            <table id="table1" class="table table-responsive table-hover">
-                <thead class="thead-default">
-                    <tr>
-                        <th>#</th>
-                        {% if user.is_superuser %}<th>Owner</th>{%  endif %}
-                        <th>CPU</th>
-                        <th>Memory</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for vm in vms %}
-                    <tr onclick='window.document.location="{% url 'leases:vm_detail' pk=vm.pk %}";'>
-                        <th scope="row"><a href="{% url 'leases:vm_detail' pk=vm.pk %}">#{{ vm.pk }}</a></th>
-                        {% if user.is_superuser %}<td>{{ vm.author }}</td>{%  endif %}
-                        <td>{{ vm.get_core_count_display }}</td>
-                        <td>{{ vm.get_memory_size_display }}</td>
-                        <td>{{ vm.created_date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {%  else  %}
-        <h3>You have no VMs.</h3>
-        {% endif %}
+         <div class="col-md-8">
+             {%  if vms %}
+                 <h1>Your VMs</h1>
+                 {% else %}
+                 <h1>You have no VMs</h1>
+                 {% endif %}
         </div>
+    </div>
+
+    <div class="row">
+
+                {% for vm in vms %}
+                    <div class="col-md-5 border-top-1" onclick='window.document.location="{% url 'leases:vm_detail' pk=vm.pk %}";'>
+                        <div class="row" >
+                            <div class="col-2 offset-2 col-lg-3 offset-lg-0" ><img src="{{STATIC_URL}}images/WIN10.svg" height="100"></div>
+                            <div class="col-lg-8 offset-lg-1">
+
+                                <div class="row attrSet">
+                                    <div class="col-8 col-md-6 text-xs-left text-lg-right">
+                                        <p class="attrTitle">Cores:</p>
+                                    </div>
+                                    <div class="col-4 col-md-6">
+                                        <p class="attrVal">{{ vm.core_count }}</p>
+                                    </div>
+                                </div>
+                                 <div class="row">
+                                    <div class="col-8 col-md-6  text-xs-left text-lg-right">
+                                        <p class="attrTitle">Memory:</p>
+                                    </div>
+                                    <div class="col-4 col-md-6">
+                                        <p class="attrVal">{{ vm.memory_size }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
 
     </div>
-    <div class="row">
-        <div class="col-lg-6 offset-lg-3">
-            <hr>
-        </div>
+    <div class="row ">
+        <div class="spacer">&nbsp</div>
     </div>
     <div class="row">
-        <div class="col-lg-6 offset-lg-3">
-            <a class="btn btn-primary float-right" href={% url 'leases:vm_new' %} role="button">New VM</a>
+    <div class="col-md-2">
+            <a class="btn btn-lg btn-primary float-md-right" href={% url 'leases:vm_new' %} role="button">New VM</a>
         </div>
     </div>
+
 {% endblock content %}

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 
 from vmsareus.taskapp import celery
-from vmsareus.vmleases.forms import VmForm
+from vmsareus.vmleases.forms import ExampleForm
 from .models import Vm
 
 
@@ -42,38 +42,27 @@ def vm_detail(request, pk):
 @login_required
 def vm_new(request):
     if request.method == "POST":
-        form = VmForm(request.POST)
+        form = ExampleForm(request.POST)
         if form.is_valid():
-            vm = form.save(commit=False)
+            vm = Vm(host_os=form.cleaned_data['host_os'],
+                    core_count=form.cleaned_data['core_count'],
+                    memory_size=form.cleaned_data['memory_size'])
+            # vm = form.save(commit=False)
             vm.author = request.user
             vm.save()
 
             # calculate values for template, cores, and memory from the submitted form
 
-            celery.fill_lease.delay(vm.pk, 'vmrus-win10', 12, 16)
+            # celery.fill_lease.delay(vm.pk, 'vmrus-win10', 12, 16)
             return redirect('leases:vm_detail', pk=vm.pk)
     else:
-        form = VmForm()
-    return render(request, 'leases/vm_edit.html', {'form': form})
-
-@login_required
-def vm_edit(request, pk):
-    vm = get_object_or_404(Vm, pk=pk)
-    if request.method == "POST":
-        form = VmForm(request.POST, instance=vm)
-        if form.is_valid():
-            vm = form.save(commit=False)
-            vm.author = request.user
-            vm.save()
-            return redirect('leases:vm_detail', pk=vm.pk)
-    else:
-        form = VmForm(instance=vm)
+        form = ExampleForm()
     return render(request, 'leases/vm_edit.html', {'form': form})
 
 @login_required
 def vm_remove(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
-    celery.delete_vm.delay(vm.vm_name)
+    #celery.delete_vm.delay(vm.vm_name)
     vm.delete()
     return redirect('leases:vm_list')
 
