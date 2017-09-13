@@ -20,7 +20,7 @@ class CPUOption(models.Model):
     def __str__(self):  # __unicode__ on Python 2
         return str(self.core_count)
 
-class HostOS(models.Model):
+class HostOsOption(models.Model):
     INIT_CHOICES = (
         (1, 'none'),
         (2, 'windows 10 ssh'),
