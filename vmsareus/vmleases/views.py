@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 
 from vmsareus.taskapp import celery
 from vmsareus.vmleases.forms import ExampleForm
-from .models import Vm
+from .models import Vm, HostOsOption
 
 
 # Create your views here.
@@ -44,7 +44,10 @@ def vm_new(request):
     if request.method == "POST":
         form = ExampleForm(request.POST)
         if form.is_valid():
-            vm = Vm(host_os=form.cleaned_data['host_os'],
+            option = HostOsOption.objects.filter(template_name=form.cleaned_data['host_os']).first()
+
+            print(form.cleaned_data['core_count'])
+            vm = Vm(host_os=option.display_name,
                     core_count=form.cleaned_data['core_count'],
                     memory_size=form.cleaned_data['memory_size'])
             # vm = form.save(commit=False)
@@ -53,7 +56,8 @@ def vm_new(request):
 
             # calculate values for template, cores, and memory from the submitted form
 
-            # celery.fill_lease.delay(vm.pk, 'vmrus-win10', 12, 16)
+            celery.fill_lease.delay(vm.pk, option.template_name, vm.core_count, vm.memory_size)
+
             return redirect('leases:vm_detail', pk=vm.pk)
     else:
         form = ExampleForm()
@@ -62,7 +66,7 @@ def vm_new(request):
 @login_required
 def vm_remove(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
-    #celery.delete_vm.delay(vm.vm_name)
+    celery.delete_vm.delay(vm.vm_name)
     vm.delete()
     return redirect('leases:vm_list')
 

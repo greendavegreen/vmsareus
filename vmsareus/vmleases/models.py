@@ -30,8 +30,8 @@ class HostOsOption(models.Model):
     display_icon = models.IntegerField(choices=INIT_CHOICES)
     init_type = models.IntegerField(choices=INIT_CHOICES)
     alive = models.BooleanField(default=True)
-    cpu_choices = models.ManyToManyField(CPUOption)
-    mem_choices = models.ManyToManyField(MemoryOption)
+    # cpu_choices = models.ManyToManyField(CPUOption)
+    # mem_choices = models.ManyToManyField(MemoryOption)
 
     def __str__(self):  # __unicode__ on Python 2
         return self.display_name + ' -> ' + self.template_name

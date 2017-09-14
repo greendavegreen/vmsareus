@@ -2,7 +2,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout
 from django import forms
 
-from .models import Vm
+from .models import Vm, HostOsOption, MemoryOption, CPUOption
 
 TITLE_CHOICES = (
     ('win10', 'Your Friendly Windows 10 VM'),
@@ -28,22 +28,35 @@ class VmForm2(forms.ModelForm):
 
 
 class ExampleForm(forms.Form):
+    hosts =[]
+    for h in HostOsOption.objects.all():
+        hosts.append([h.template_name, h.display_name])
+
+    mem =[]
+    for m in MemoryOption.objects.all():
+        mem.append([m.gigabyte_count, m.gigabyte_count])
+
+    cpu =[]
+    for c in CPUOption.objects.all():
+        cpu.append([c.core_count, c.core_count])
+
+
     host_os = forms.CharField(
         label="What OS would like you like on your VM?",
-        widget=forms.Select(choices=TITLE_CHOICES),
+        widget=forms.Select(choices=hosts),
         required=True,
     )
 
     core_count = forms.IntegerField(
         label="How many CPU cores would you like?",
         required=True,
-        widget=forms.Select(choices=CORES)
+        widget=forms.Select(choices=cpu)
     )
 
     memory_size = forms.IntegerField(
         label="How much memory would you like?",
         required=True,
-        widget=forms.Select(choices=MEMORIES)
+        widget=forms.Select(choices=mem)
     )
 
     def __init__(self, *args, **kwargs):
