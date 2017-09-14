@@ -1,8 +1,9 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout
 from django import forms
+import json
 
-from .models import Vm, HostOsOption, MemoryOption, CPUOption
+from .models import Vm
 
 TITLE_CHOICES = (
     ('win10', 'Your Friendly Windows 10 VM'),
@@ -29,16 +30,23 @@ class VmForm2(forms.ModelForm):
 
 class ExampleForm(forms.Form):
     hosts =[]
-    # for h in HostOsOption.objects.all():
-    #     hosts.append([h.template_name, h.display_name])
+    with open('host_os_choices.json') as host_data_file:
+        host_data = json.load(host_data_file)
+    for h in host_data:
+        hosts.append([h["template_name"], h["display_name"]])
 
     mem =[]
-    # for m in MemoryOption.objects.all():
-    #     mem.append([m.gigabyte_count, m.gigabyte_count])
+    with open('memory_choices.json') as memory_data_file:
+        memory_list = json.load(memory_data_file)
+    for m in memory_list:
+        mem.append([m,m])
+
 
     cpu =[]
-    # for c in CPUOption.objects.all():
-    #     cpu.append([c.core_count, c.core_count])
+    with open('cpu_choices.json') as cpu_data_file:
+        cpu_list = json.load(cpu_data_file)
+    for c in cpu_list:
+         cpu.append([c, c])
 
 
     host_os = forms.CharField(

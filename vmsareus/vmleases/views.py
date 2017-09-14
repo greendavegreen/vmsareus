@@ -1,10 +1,12 @@
+import json
+
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 
 from vmsareus.taskapp import celery
 from vmsareus.vmleases.forms import ExampleForm
-from .models import Vm, HostOsOption
+from .models import Vm
 
 
 # Create your views here.
@@ -39,15 +41,24 @@ def vm_detail(request, pk):
                                                      'guest_power': guest_power})
 
 
+def get_os_info(requested_template):
+    with open('host_os_choices.json') as host_data_file:
+        host_data = json.load(host_data_file)
+    for h in host_data:
+        if h['template_name'] == requested_template:
+            return h
+
+    return None
+
 @login_required
 def vm_new(request):
     if request.method == "POST":
         form = ExampleForm(request.POST)
         if form.is_valid():
-            option = HostOsOption.objects.filter(template_name=form.cleaned_data['host_os']).first()
+            config = get_os_info(form.cleaned_data['host_os'])
 
-            print(form.cleaned_data['core_count'])
-            vm = Vm(host_os=option.display_name,
+            print(config)
+            vm = Vm(host_os=config['display_name'],
                     core_count=form.cleaned_data['core_count'],
                     memory_size=form.cleaned_data['memory_size'])
             # vm = form.save(commit=False)
@@ -56,7 +67,7 @@ def vm_new(request):
 
             # calculate values for template, cores, and memory from the submitted form
 
-            celery.fill_lease.delay(vm.pk, option.template_name, vm.core_count, vm.memory_size)
+            celery.fill_lease.delay(vm.pk, config['template_name'], vm.core_count, vm.memory_size)
 
             return redirect('leases:vm_detail', pk=vm.pk)
     else:
