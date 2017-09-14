@@ -1,6 +1,8 @@
 import json
+import os
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -42,7 +44,7 @@ def vm_detail(request, pk):
 
 
 def get_os_info(requested_template):
-    with open('host_os_choices.json') as host_data_file:
+    with open(os.path.join(str(settings.ROOT_DIR),'host_os_choices.json')) as host_data_file:
         host_data = json.load(host_data_file)
     for h in host_data:
         if h['template_name'] == requested_template:

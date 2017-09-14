@@ -1,7 +1,10 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout
-from django import forms
 import json
+
+import os
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
+from django import forms
+from django.conf import settings
 
 from .models import Vm
 
@@ -29,21 +32,23 @@ class VmForm2(forms.ModelForm):
 
 
 class ExampleForm(forms.Form):
+    print(settings.ROOT_DIR)
+
     hosts =[]
-    with open('host_os_choices.json') as host_data_file:
+    with open(os.path.join(str(settings.ROOT_DIR),'host_os_choices.json')) as host_data_file:
         host_data = json.load(host_data_file)
     for h in host_data:
         hosts.append([h["template_name"], h["display_name"]])
 
     mem =[]
-    with open('memory_choices.json') as memory_data_file:
+    with open(os.path.join(str(settings.ROOT_DIR),'memory_choices.json')) as memory_data_file:
         memory_list = json.load(memory_data_file)
     for m in memory_list:
         mem.append([m,m])
 
 
     cpu =[]
-    with open('cpu_choices.json') as cpu_data_file:
+    with open(os.path.join(str(settings.ROOT_DIR),'cpu_choices.json')) as cpu_data_file:
         cpu_list = json.load(cpu_data_file)
     for c in cpu_list:
          cpu.append([c, c])
