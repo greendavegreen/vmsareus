@@ -34,8 +34,6 @@ def vm_detail(request, pk):
         guest_os = info['os']
         guest_power = info['power']
         ip = info['ip']
-        if ip:
-            celery.create_account(ip)
 
     else:
         guest_os = 'unknown'

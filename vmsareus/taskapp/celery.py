@@ -14,6 +14,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.urls import reverse
+from paramiko import AuthenticationException
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 import paramiko
@@ -114,6 +115,7 @@ def new_client(addr):
 
 
 def do_cmd(client, command):
+    print("running " + command)
     stdin, stdout, stderr = client.exec_command(command)
     stdin.close()
     for line in stdout.read().splitlines():
@@ -121,13 +123,23 @@ def do_cmd(client, command):
 
 
 @app.task()
-def create_account(addr):
+def create_account(id, addr, user):
+    client = None
     try:
-        client = new_client(addr)
-        do_cmd(client, 'pwd')
+        time.sleep(10)
 
+        client = new_client(addr)
+        do_cmd(client, "net user %s 00ChangeThis /add" % (user))
+        do_cmd(client, "net localgroup administrators %s /add" % (user))
+        do_cmd(client, "mkdir /home/%s" % (user))
+
+        send_notify_email.delay(id)
+
+    except AuthenticationException:
+        print("failed to authenticate")
     finally:
-        client.close()
+        if client:
+            client.close()
 
 
 @app.task
@@ -162,6 +174,49 @@ def confirm_folder():
         else:
             print("error locating or creating folder")
 
+@app.task
+def wait_for_ip(id):
+    from ..vmleases.models import Vm
+    try:
+        time.sleep(5)
+        vm = Vm.objects.get(pk=id)
+
+        while True:
+            info = get_vm_info(vm.vm_name)
+            if info:
+                if info['ip']:
+                    ip = info['ip']
+                    print('{} has ip {}'.format(vm.vm_name, info['ip']))
+                    create_account.delay(id, ip, vm.author.username)
+                    break
+            else:
+                print('vm not found in vcenter {}'.format(vm.vm_name))
+                break
+            time.sleep(5)
+    except ObjectDoesNotExist:
+        print('VM does not exist: {0!s}'.format(id))
+
+
+@app.task
+def send_notify_email(id):
+    from ..vmleases.models import Vm
+    try:
+        time.sleep(10)
+        obj = Vm.objects.get(pk=id)
+
+        full_url = ''.join(['http://', get_current_site(None).domain, reverse('leases:vm_detail', args=[obj.id])])
+        print('sending mail to {} about {}'.format(obj.author.email, full_url))
+
+        send_mail(
+            'Requested VM {} is ready!'.format(obj.vm_name),
+            'Your VM has been cloned! More info can be found at {}'.format(full_url),
+            'vmsareus@vmsareus.lebanon.cd-adapco.com',
+            [obj.author.email],
+            fail_silently=False,
+        )
+    except ObjectDoesNotExist:
+        print('VM does not exist: {0!s}'.format(id))
+
 
 @app.task
 def fill_lease(id, template_name, core_count, mem_gigs):
@@ -180,16 +235,7 @@ def fill_lease(id, template_name, core_count, mem_gigs):
                 obj.vm_name = name
                 obj.save()
                 print('VM created:{} status {}'.format(name, obj.vm_state))
-                full_url = ''.join(['http://', get_current_site(None).domain, reverse('leases:vm_detail', args=[obj.id])])
-                print('sending mail to {} about {}'.format(obj.author.email, full_url))
-
-                send_mail(
-                    'Requested VM {} is ready!'.format(name),
-                    'Your VM has been cloned! More info can be found at {}'.format(full_url),
-                    'vmsareus@vmsareus.lebanon.cd-adapco.com',
-                    [obj.author.email],
-                    fail_silently=False,
-                )
+                wait_for_ip.delay(id)
             else:
                 print('call to vm creation failed')
                 obj.vm_state = 'a'
