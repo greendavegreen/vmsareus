@@ -307,3 +307,7 @@ VCENTER_FOLDER = env('VCENTER_FOLDER', default=None)
 VCENTER_DATASTORE = env('VCENTER_DATASTORE', default=None)
 VCENTER_CLUSTER = env('VCENTER_CLUSTER', default=None)
 VCENTER_POOL = env('VCENTER_POOL', default=None)
+
+
+VM_DEFPW = env('VM_DEFPW', default=None)
+VM_DEFUSER = env('VM_DEFUSER', default=None)

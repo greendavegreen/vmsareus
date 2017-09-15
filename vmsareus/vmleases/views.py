@@ -28,11 +28,15 @@ def vm_list(request):
 @login_required
 def vm_detail(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
+
     info = celery.get_vm_info(vm.vm_name)
     if info:
         guest_os = info['os']
         guest_power = info['power']
         ip = info['ip']
+        if ip:
+            celery.create_account(ip)
+
     else:
         guest_os = 'unknown'
         guest_power = 'unknown'

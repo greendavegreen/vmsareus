@@ -2,21 +2,21 @@ from __future__ import absolute_import
 
 import atexit
 import math
-import os
 import ssl
 import time
 from datetime import datetime
 
+import os
 from celery import Celery
 from django.apps import apps, AppConfig
 from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.urls import reverse
-from django.contrib.sites.shortcuts import get_current_site
-
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
+import paramiko
 
 from .tools import tasks
 
@@ -25,6 +25,7 @@ if not settings.configured:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')  # pragma: no cover
 
 app = Celery('vmsareus')
+
 
 class CeleryConfig(AppConfig):
     name = 'vmsareus.taskapp'
@@ -49,14 +50,9 @@ class CeleryConfig(AppConfig):
             raven_register_signal(raven_client)
 
 
-
-
 @app.task(bind=True)
 def debug_task(self):
-    from ..vmleases.models import Vm
-
     print('Request: {0!r}'.format(self.request))  # pragma: no cover
-
 
 
 def validate_config():
@@ -69,6 +65,7 @@ def validate_config():
                 settings.VCENTER_PORT is None or
                 settings.VCENTER_DATACENTER is None)
 
+
 def connect():
     context = ssl._create_unverified_context()
     si = SmartConnect(host=settings.VCENTER_HOST,
@@ -78,8 +75,10 @@ def connect():
                       sslContext=context)
     return si
 
+
 def get_obj(content, vimtype, name):
     return get_obj_in_folder(content, content.rootFolder, vimtype, name)
+
 
 def get_obj_in_folder(content, folder, vimtype, name):
     obj = None
@@ -91,6 +90,7 @@ def get_obj_in_folder(content, folder, vimtype, name):
             break
     return obj
 
+
 def find_or_create_folder(content, foldername):
     dc = get_obj(content, [vim.Datacenter], settings.VCENTER_DATACENTER)
     if dc:
@@ -100,6 +100,35 @@ def find_or_create_folder(content, foldername):
     else:
         print("could not locate specified datacenter.")
         return None
+
+
+def new_client(addr):
+    print ("connecting %s, [%s,%s]" % (addr, settings.VM_DEFUSER, settings.VM_DEFPW))
+
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+    client.connect(addr, 22, username=settings.VM_DEFUSER, password=settings.VM_DEFPW)
+
+    return client
+
+
+def do_cmd(client, command):
+    stdin, stdout, stderr = client.exec_command(command)
+    stdin.close()
+    for line in stdout.read().splitlines():
+        print('remote-output -> %s' % (line))
+
+
+@app.task()
+def create_account(addr):
+    try:
+        client = new_client(addr)
+        do_cmd(client, 'pwd')
+
+    finally:
+        client.close()
+
 
 @app.task
 def update_vm_state(pk):
@@ -225,6 +254,7 @@ def create_cluster_vm(template_name, cpu_count, mem_gigs, vm_name):
 
     return False
 
+
 @app.task
 def create_vm(template_name, cpu_count, mem_gigs, vm_name):
     if validate_config():
@@ -276,6 +306,7 @@ def create_vm(template_name, cpu_count, mem_gigs, vm_name):
 
     return False
 
+
 def getsummary(result):
     if hasattr(result, 'summary'):
         return result.summary
@@ -283,6 +314,7 @@ def getsummary(result):
         return result.vm.summary
     else:
         return None
+
 
 def print_result(task):
     print(task.info.state)
@@ -334,6 +366,7 @@ def delete_vm(vm_name):
         else:
             print("could not locate VM named: " + vm_name)
 
+
 @app.task
 def get_vm_info(vm_name):
     if validate_config():
@@ -365,9 +398,11 @@ def get_vm_info(vm_name):
 
     return None
 
+
 @app.task
 def task_list():
-    #rows, columns = os.popen('stty size', 'r').read().split()
+    # rows, columns = os.popen('stty size', 'r').read().split()
+
     rows = 10
     columns = 120
 
