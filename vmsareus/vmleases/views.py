@@ -34,15 +34,21 @@ def vm_detail(request, pk):
         guest_os = info['os']
         guest_power = info['power']
         ip = info['ip']
-
     else:
         guest_os = 'unknown'
         guest_power = 'unknown'
         ip = 'unknkown'
+
     return render(request, 'leases/vm_detail.html', {'vm': vm,
                                                      'ip': ip,
                                                      'guest_os': guest_os,
                                                      'guest_power': guest_power})
+
+@login_required
+def vm_manage(request, pk):
+    vm = get_object_or_404(Vm, pk=pk)
+
+    return render(request, 'leases/vm_manage.html', {'vm': vm})
 
 
 def get_os_info(requested_template):
@@ -63,6 +69,7 @@ def vm_new(request):
 
             print(config)
             vm = Vm(host_os=config['display_name'],
+                    branch_name=form.cleaned_data['branch_name'],
                     core_count=form.cleaned_data['core_count'],
                     memory_size=form.cleaned_data['memory_size'])
             # vm = form.save(commit=False)
@@ -90,7 +97,7 @@ def vm_extend(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
     vm.expires_date = vm.expires_date + relativedelta(months=1)
     vm.save()
-    return redirect('leases:vm_detail', pk=vm.pk)
+    return redirect('leases:vm_manage', pk=vm.pk)
 
 
 

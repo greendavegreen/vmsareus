@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+T{% block content %}
+    <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Delete VM
+                </div>
+                <div class="modal-body">
+                    <p>This operation will delete all data associated with this VM.</p>
+                    <p>This cannot be undone.  Do you wish to continue?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-danger btn-ok">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row ">
+        <div class="spacer">&nbsp</div>
+    </div>
+
+    <div class="row rowg">
+
+            <div class="col-lg-6 offset-lg-3">
+                <div class="row">
+                    <div class="col-6 "><h3>Leasing</h3></div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <p>VMs created by this system are assigned a default lifetime of 1 month.  When the lease period expires, the machine will be reclaimed by the recycling process.  If you wish to keep this VM longer, you must extend the lease duration using this provided button.</p>
+                    </div>
+                </div>
+                <div class="row rowo">
+                    <div class="col-4 col-sm-4 text-right">
+                        Born:
+                    </div>
+                    <div class="col-8 ">
+                        {{ vm.created_date | date:"E d Y" }}
+                    </div>
+                </div>
+
+                <div class="row rowo">
+                    <div class="col-4 col-sm-4 text-right">
+                        Expires:
+                    </div>
+                    <div class="col-8 ">
+                        {{ vm.expires_date | date:"E d Y" }}
+                    </div>
+                </div>
+
+                <div class="hspacer">&nbsp</div>
+
+            </div>
+
+    </div>
+
+    <div class="row rowg">
+        <div class="col-lg-6 offset-lg-3">
+            <a class="btn btn-success" href="{% url 'leases:vm_extend' pk=vm.pk %}">
+                Extend Lease
+            </a>
+        </div>
+    </div>
+
+    <div class="row rowg">
+        <div class="spacer">&nbsp</div>
+    </div>
+
+    <div class="row ">
+        <div class="spacer">&nbsp</div>
+    </div>
+
+        <div class="row rowg">
+
+            <div class="col-lg-6 offset-lg-3">
+                <div class="row">
+                    <div class="col-6 "><h3>Early Termination</h3></div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <p>Should you finish with this VM before its lease expires, you are always welcome to terminate it early.  Use the provided button to return the bits to the recycler.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row rowg">
+            <div class="col-lg-6 offset-lg-3">
+                <button class="btn btn-danger" data-href="{% url 'leases:vm_remove' pk=vm.pk %}" data-toggle="modal" data-target="#confirm-delete">
+                    Delete this VM
+            </button>
+        </div>
+        <div class="row">
+            <div class="spacer">&nbsp</div>
+        </div>
+    </div>
+
+
+    </div>
+
+
+
+{% endblock %}

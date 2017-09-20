@@ -39,3 +39,6 @@ jQuery.ui.autocomplete.prototype._resizeMenu = function () {
   ul.outerWidth(this.element.outerWidth());
 }
 
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})

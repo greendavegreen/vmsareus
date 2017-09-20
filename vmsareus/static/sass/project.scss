@@ -153,18 +153,10 @@ section.controls {
 
 
 .border-top-1 {
+  border-width:1px;
   border-style:solid;
-  border-radius:30px;
-  /*border-bottom:1px;*/
-  margin:5px 5px;
-  padding:10px;
-  background-color:#e4f1eb;
+  border-radius:5px;
+  background-color:#ffffff;
+  margin-top:10px;
 }
 
-div.attrSet {
-  margin-top:20px;
-}
-p.attrVal, p.attrTitle{
-  font-size:1.8rem;
-  margin-top: -10px;
-}

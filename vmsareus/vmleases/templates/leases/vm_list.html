@@ -2,56 +2,63 @@
 {% block title %}Vms{% endblock %}
 
 {% block content %}
-    <div class="row ">
-        <div class="spacer">&nbsp</div>
-    </div>
-    <div class="row">
-         <div class="col-md-8">
-             {%  if vms %}
-                 <h1>Your VMs</h1>
-                 {% else %}
-                 <h1>You have no VMs</h1>
-                 {% endif %}
+
+    <div class="row" style="margin-top:30px;">
+        <div class="col-9" >
+            <h2>Your VMs</h2>
+        </div>
+        <div class="col-3">
+            <a class="btn btn-lg btn-secondary"  href={% url 'leases:vm_new' %} title="Create a new VM" role="button">+</a>
         </div>
     </div>
-
-    <div class="row">
-
-                {% for vm in vms %}
-                    <div class="col-md-5 border-top-1" onclick='window.document.location="{% url 'leases:vm_detail' pk=vm.pk %}";'>
-                        <div class="row" >
-                            <div class="col-2 offset-2 col-lg-3 offset-lg-0" ><img src="{{STATIC_URL}}images/WIN10.svg" height="100"></div>
-                            <div class="col-lg-8 offset-lg-1">
-
-                                <div class="row attrSet">
-                                    <div class="col-8 col-md-6 text-xs-left text-lg-right">
-                                        <p class="attrTitle">Cores:</p>
-                                    </div>
-                                    <div class="col-4 col-md-6">
-                                        <p class="attrVal">{{ vm.core_count }}</p>
-                                    </div>
-                                </div>
-                                 <div class="row">
-                                    <div class="col-8 col-md-6  text-xs-left text-lg-right">
-                                        <p class="attrTitle">Memory:</p>
-                                    </div>
-                                    <div class="col-4 col-md-6">
-                                        <p class="attrVal">{{ vm.memory_size }}</p>
-                                    </div>
+<hr>
+    {%  if vms %}
+        <div class="row">
+            {% for vm in vms %}
+                <div class="col-lg-5  col-sm-11 {% if forloop.counter|divisibleby:2 %} offset-lg-1 {% endif %} border-top-1">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-12"><img src="{{STATIC_URL}}images/Windows_10_Logo.svg" width="240" style="margin-top:10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row" style="margin-top:10px;">
+                                <div class="col-2 col-md-1 col-lg-2"><img src="{{STATIC_URL}}images/branch-dark.svg" height="50" ></div>
+                                <div class="col-9 ">
+                                    <p>{{ vm.branch_name }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
-
-    </div>
-    <div class="row ">
-        <div class="spacer">&nbsp</div>
-    </div>
-    <div class="row">
-    <div class="col-md-2">
-            <a class="btn btn-lg btn-primary float-md-right" href={% url 'leases:vm_new' %} role="button">New VM</a>
+                    <div class="row">
+                        <div class="col-9"><a class="btn btn-outline-primary btn-lg btn-block"
+                                              href={% url 'leases:vm_detail' pk=vm.pk %} role="link"
+                                              data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The management panel lets you extend your lease or terminate the VM."
+                                              style="margin-top:10px;">Connection Info... </a></div>
+                        <div class="col-3 ">
+                            <a class="btn btn-outline-secondary" type="link"
+                                    href={% url 'leases:vm_manage' pk=vm.pk %}
+                                    data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The management panel lets you extend your lease or terminate the VM."
+                                    style="margin-top:10px;margin-bottom:20px;">
+                                <img src="{{STATIC_URL}}images/settings-cog.svg" height="30" >
+                            </a>
+                        </div>
+                    </div>
+{#                    <div class="row">#}
+{#                        <div class="col-xs-6"><img src="assets/img/information.svg" height="40" style="margin:40px;"></div>#}
+{#                        <div class="col-xs-6"><img src="assets/img/clock.svg" height="40" style="margin:40px;"></div>#}
+{#                    </div>#}
+                </div>
+            {% endfor %}
         </div>
-    </div>
-
+    {% else %}
+        <div class="row">
+             <div class="col-md-8 offset-md-2">
+                <h1>You have no VMs</h1>
+             </div>
+        </div>
+    {% endif %}
 {% endblock content %}
