@@ -20,7 +20,9 @@ urlpatterns = [
     url(r'^accounts/', include('allauth.urls')),
 
     # Your stuff: custom urls includes go here
-    url(r'^leases/', include('vmsareus.vmleases.urls', namespace='leases'))
+    url(r'^api/', include('vmsareus.vmleases.api_urls', namespace='api')),
+    url(r'^leases/', include('vmsareus.vmleases.urls', namespace='leases')),
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

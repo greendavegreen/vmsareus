@@ -17,6 +17,8 @@ class Vm(models.Model):
 
     author = models.ForeignKey('users.User', on_delete=models.CASCADE)
 
+    branch_name = models.CharField(max_length=128, default='')
+
     core_count = models.IntegerField()
     memory_size = models.IntegerField()
     host_os = models.CharField(max_length=32, default='ubumini')

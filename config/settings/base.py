@@ -311,3 +311,6 @@ VCENTER_POOL = env('VCENTER_POOL', default=None)
 
 VM_DEFPW = env('VM_DEFPW', default=None)
 VM_DEFUSER = env('VM_DEFUSER', default=None)
+
+STASH_USER = env('STASH_USER', default=None)
+STASH_PW = env('STASH_PW', default=None)

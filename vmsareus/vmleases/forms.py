@@ -53,6 +53,12 @@ class ExampleForm(forms.Form):
     for c in cpu_list:
          cpu.append([c, c])
 
+    branch_name = forms.CharField(
+        label="What feature branch would you liked checked out?",
+        widget=forms.TextInput(attrs={'placeholder': 'Enter a branch name',
+                                      'id': 'foobar'}),
+        required=True,
+    )
 
     host_os = forms.CharField(
         label="What OS would like you like on your VM?",

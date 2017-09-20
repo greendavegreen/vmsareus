@@ -24,3 +24,18 @@ $('#confirm-delete').on('show.bs.modal', function(e) {
     $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
 });
 
+
+$(document).ready(function(){
+    var location_input=$('input[id="foobar"]');
+    location_input.autocomplete({
+      source: "/api/list_branches",
+      minLength: 2
+    });
+  } );
+
+//   keeps same width as box
+jQuery.ui.autocomplete.prototype._resizeMenu = function () {
+  var ul = this.menu.element;
+  ul.outerWidth(this.element.outerWidth());
+}
+

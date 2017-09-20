@@ -91,3 +91,6 @@ def vm_extend(request, pk):
     vm.expires_date = vm.expires_date + relativedelta(months=1)
     vm.save()
     return redirect('leases:vm_detail', pk=vm.pk)
+
+
+
