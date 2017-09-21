@@ -22,6 +22,12 @@ def vm_list(request):
     else:
         vms = Vm.objects.filter(author=request.user)
 
+    for vm in vms:
+        if vm.branch_name.startswith("feature/",):
+            vm.short_branch_name = vm.branch_name[8:]
+        else:
+            vm.short_branch_name = vm.branch_name
+
     return render(request, 'leases/vm_list.html', {'vms': vms})
 
 
@@ -80,7 +86,7 @@ def vm_new(request):
 
             celery.fill_lease.delay(vm.pk, config['template_name'], vm.core_count, vm.memory_size)
 
-            return redirect('leases:vm_detail', pk=vm.pk)
+            return redirect('leases:vm_list')
     else:
         form = ExampleForm()
     return render(request, 'leases/vm_edit.html', {'form': form})

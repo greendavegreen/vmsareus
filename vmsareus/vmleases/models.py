@@ -11,6 +11,8 @@ class Vm(models.Model):
     STATES = (
         ('q', 'queued'),
         ('c', 'creating'),
+        ('p', 'prepping'),
+        ('b', 'building'),
         ('r', 'running'),
         ('a', 'aborted'),
     )

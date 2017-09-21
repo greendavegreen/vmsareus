@@ -12,10 +12,10 @@
         </div>
     </div>
 <hr>
-    {%  if vms %}
+
         <div class="row">
             {% for vm in vms %}
-                <div class="col-lg-5  col-sm-11 {% if forloop.counter|divisibleby:2 %} offset-lg-1 {% endif %} border-top-1">
+                <div class="col-lg-5  col-sm-11 {% cycle '' 'offset-lg-1' %} border-top-1">
                     <div class="row">
                         <div class="col-12">
                             <div class="row">
@@ -28,37 +28,150 @@
                             <div class="row" style="margin-top:10px;">
                                 <div class="col-2 col-md-1 col-lg-2"><img src="{{STATIC_URL}}images/branch-dark.svg" height="50" ></div>
                                 <div class="col-9 ">
-                                    <p>{{ vm.branch_name }}</p>
+                                    <p>{{ vm.short_branch_name }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-9"><a class="btn btn-outline-primary btn-lg btn-block"
-                                              href={% url 'leases:vm_detail' pk=vm.pk %} role="link"
-                                              data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The management panel lets you extend your lease or terminate the VM."
-                                              style="margin-top:10px;">Connection Info... </a></div>
-                        <div class="col-3 ">
-                            <a class="btn btn-outline-secondary" type="link"
-                                    href={% url 'leases:vm_manage' pk=vm.pk %}
-                                    data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The management panel lets you extend your lease or terminate the VM."
-                                    style="margin-top:10px;margin-bottom:20px;">
-                                <img src="{{STATIC_URL}}images/settings-cog.svg" height="30" >
-                            </a>
+
+
+
+                    {% if vm.vm_state == 'q' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Queuing</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The VMsAreUs system has not begun to create your system yet."
+                                     height="30" >
+                            </div>
                         </div>
-                    </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                    <div class="one primary-color"></div>
+                                    <div class="two no-color"></div>
+                                    <div class="three no-color"></div>
+                                    <div class="progress-bar" style="width: 27%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% elif vm.vm_state == 'c' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Creating VM</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="VMware is currently creating your virtual machine."
+                                     height="30" >
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                    <div class="one primary-color"></div>
+                                    <div class="two primary-color"></div>
+                                    <div class="three no-color"></div>
+                                    <div class="progress-bar" style="width: 52%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif vm.vm_state == 'p' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Prepping system</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Your account is being created and a drive containing your branch will be attached."
+                                     height="30" >
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                    <div class="one primary-color"></div>
+                                    <div class="two primary-color"></div>
+                                    <div class="three primary-color"></div>
+                                    <div class="progress-bar" style="width: 77%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif vm.vm_state == 'b' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Building code</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="A build is being run on your branch."
+                                     height="30" >
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                    <div class="one primary-color"></div>
+                                    <div class="two primary-color"></div>
+                                    <div class="three primary-color"></div>
+                                    <div class="progress-bar" style="width: 90%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif vm.vm_state == 'r' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-9">
+                                <h3 class="text-center">VM is ready</h3>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-9"><a class="btn btn-outline-primary btn-lg btn-block"
+                                                  href={% url 'leases:vm_detail' pk=vm.pk %} role="link"
+                                                  data-toggle="popover" data-trigger="hover" data-placement="top" data-content="This button provides initial login information and network address of your VM."
+                                                  style="margin-top:10px;">Connection Info... </a></div>
+                            <div class="col-3 ">
+                                <a class="btn btn-outline-secondary" type="link"
+                                        href={% url 'leases:vm_manage' pk=vm.pk %}
+                                        data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The management panel lets you extend your lease or terminate the VM."
+                                        style="margin-top:10px;margin-bottom:20px;">
+                                    <img src="{{STATIC_URL}}images/settings-cog.svg" height="30" >
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="row">
+                            <div class="col-9">The creation of your VM aborted.</div>
+                            <div class="col-3 ">
+                                <a class="btn btn-outline-secondary" type="link"
+                                        href={% url 'leases:vm_manage' pk=vm.pk %}
+                                        data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The management panel lets you extend your lease or terminate the VM."
+                                        style="margin-top:10px;margin-bottom:20px;">
+                                    <img src="{{STATIC_URL}}images/settings-cog.svg" height="30" >
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+
 {#                    <div class="row">#}
 {#                        <div class="col-xs-6"><img src="assets/img/information.svg" height="40" style="margin:40px;"></div>#}
 {#                        <div class="col-xs-6"><img src="assets/img/clock.svg" height="40" style="margin:40px;"></div>#}
 {#                    </div>#}
                 </div>
+            {% empty %}
+                <div class="col-md-8 offset-md-2">
+                    <h1>You have no VMs</h1>
+                </div>
             {% endfor %}
         </div>
-    {% else %}
-        <div class="row">
-             <div class="col-md-8 offset-md-2">
-                <h1>You have no VMs</h1>
-             </div>
-        </div>
-    {% endif %}
 {% endblock content %}
