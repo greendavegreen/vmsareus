@@ -26,7 +26,11 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="row" style="margin-top:10px;">
-                                <div class="col-2 col-md-1 col-lg-2"><img src="{{STATIC_URL}}images/branch-dark.svg" height="50" ></div>
+                                <div class="col-2 col-md-1 col-lg-2">
+                                    <img src="{{STATIC_URL}}images/branch-dark.svg" height="50"
+                                         data-toggle="popover" data-trigger="hover" data-placement="right"
+                                         data-content="Feature branch to be checked out and built on this machine.">
+                                </div>
                                 <div class="col-9 ">
                                     <p>{{ vm.short_branch_name }}</p>
                                 </div>
@@ -44,7 +48,8 @@
                             </div>
                             <div class="col-2">
                                 <img src="{{STATIC_URL}}images/information.svg"
-                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The VMsAreUs system has not begun to create your system yet."
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="The VMsAreUs system has not begun to create your system yet.  It should be picked up for processing shortly."
                                      height="30" >
                             </div>
                         </div>
@@ -67,7 +72,8 @@
                             </div>
                             <div class="col-2">
                                 <img src="{{STATIC_URL}}images/information.svg"
-                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="VMware is currently creating your virtual machine."
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="VMware is currently creating your virtual machine.  This can take up to an hour.  You will receive mail when the VM is ready."
                                      height="30" >
                             </div>
                         </div>
@@ -89,7 +95,8 @@
                             </div>
                             <div class="col-2">
                                 <img src="{{STATIC_URL}}images/information.svg"
-                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Your account is being created and a drive containing your branch will be attached."
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="Your account is being created and a drive containing your branch will be attached.  This can take up to an hour.  You will receive mail when the system is ready."
                                      height="30" >
                             </div>
                         </div>
@@ -111,7 +118,8 @@
                             </div>
                             <div class="col-2">
                                 <img src="{{STATIC_URL}}images/information.svg"
-                                     data-toggle="popover" data-trigger="hover" data-placement="top" data-content="A build is being run on your branch."
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="A build is being run on your branch."
                                      height="30" >
                             </div>
                         </div>
@@ -137,12 +145,14 @@
                         <div class="row">
                             <div class="col-9"><a class="btn btn-outline-primary btn-lg btn-block"
                                                   href={% url 'leases:vm_detail' pk=vm.pk %} role="link"
-                                                  data-toggle="popover" data-trigger="hover" data-placement="top" data-content="This button provides initial login information and network address of your VM."
+                                                  data-toggle="popover" data-trigger="hover" data-placement="top"
+                                                  data-content="This button provides initial login information and network address of your VM."
                                                   style="margin-top:10px;">Connection Info... </a></div>
                             <div class="col-3 ">
                                 <a class="btn btn-outline-secondary" type="link"
                                         href={% url 'leases:vm_manage' pk=vm.pk %}
-                                        data-toggle="popover" data-trigger="hover" data-placement="top" data-content="The management panel lets you extend your lease or terminate the VM."
+                                        data-toggle="popover" data-trigger="hover" data-placement="top"
+                                        data-content="The management panel lets you extend your lease or terminate the VM."
                                         style="margin-top:10px;margin-bottom:20px;">
                                     <img src="{{STATIC_URL}}images/settings-cog.svg" height="30" >
                                 </a>
