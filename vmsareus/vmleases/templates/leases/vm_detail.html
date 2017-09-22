@@ -17,121 +17,91 @@ T{% block content %}
             </div>
         </div>
     </div>
-    <div class="row rowg">
-        <div class="spacer">&nbsp</div>
+    <div class="row" style="margin-top:30px;">
+        <div class="col-12" >
+            <h2 class="text-center">{{ vm.vm_name }}</h2>
+        </div>
     </div>
-    {% if vm.vm_state == 'a' %}
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3"><h3>Request Status</h3></div>
-        </div>
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3">Error occurred during creation of VM.  Please notify DevOps.</div>
-        </div>
-    {% endif %}
+    <div class="col-10 offset-1 border-top-1">
 
-    {% if vm.vm_state == 'q' %}
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3"><h3>Request Status</h3></div>
-        </div>
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3">Awaiting vmsAreUs service to pickup your request.  The creation process may take minutes, but we will be sure to notify you by email when your machine is ready.  </div>
-        </div>
-    {% endif %}
-
-    {% if vm.vm_state == 'c' %}
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3"><h3>Request Status</h3></div>
-        </div>
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3">Cluster is creating VM.  This process can take 10 minutes or more.  We'll send an email when this machine is ready, or you can reload this page to see the latest status.</div>
-        </div>
-    {% endif %}
-
-    {% if vm.vm_state == 'r' %}
-
-
-{#        <div class="row rowg">#}
-{#            <div class="col-6 "><h1>VM</h1></div>#}
-{#        </div>#}
-
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3"><h3>{{ vm.vm_name }}</h3></div>
-        </div>
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3">
-
-                <div class="row rowo">
-                    <div class="col-4 col-sm-4 text-right">
-                        GuestOS:
-                    </div>
-                    <div class="col-8 ">
-                        {{ guest_os }}
-                    </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12"><img src="{{STATIC_URL}}images/Windows_10_Logo.svg" width="240" style="margin-top:10px;"></div>
                 </div>
-                <div class="row rowo">
-                    <div class="col-4 col-sm-4 text-right">
-                        Power:
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-2 col-md-1 col-lg-2">
+                        <img src="{{STATIC_URL}}images/branch-dark.svg" height="50"
+                             data-toggle="popover" data-trigger="hover" data-placement="right"
+                             data-content="Feature branch to be checked out and built on this machine.">
                     </div>
-                    <div class="col-8 ">
-                        {{ guest_power }}
-                    </div>
-                </div>
-                <div class="row rowo">
-                    <div class="col-4 col-sm-4 text-right">
-                        IPAddress:
-                    </div>
-                    <div class="col-8 ">
-                        {% if ip is None %}
-                            awaiting assignment....
-                        {% else %}
-                            {{ ip }}
-                        {% endif %}
-
+                    <div class="col-9 ">
+                        <p>{{ vm.short_branch_name }}</p>
                     </div>
                 </div>
             </div>
         </div>
-	    <div class="row rowg">
-            <div class="spacer">&nbsp</div>
-        </div>
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3">
-                <div class="row rowo">
-		            <div class="col-12">
-                    	<p> Connect using a remote desktop client such as xfreerdp like this: </p>
+
+        <div class="row" style="margin-top:30px;">
+            <div class="col-12">
+                <div class="row">
+		            <div class="col-10 offset-1">
+                    	<p>You can login to your vm at address {{ ip }} with the following credentials </p>
 		            </div>
                 </div>
-                <div class="row rowo">
-                    <div class="col-12">
-                    <p>xfreerdp -u {{ request.user.username }} -g 1280x720 {{ ip }} </p>
+                <div class="row">
+                    <div class="col-8 offset-2">
+                        <div class="row">
+                            <div class="col-4 text-right">
+                                    User:
+                            </div>
+                            <div class="col-8 ">
+                                   {{ request.user.username }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-4 col-sm-4 text-right">
+                                    password:
+                            </div>
+                            <div class="col-8 ">
+                              00ChangeThis
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row" style="margin-top:20px;">
+		            <div class="col-10 offset-1">
+                    	<p>You can use xfreerdp to login to your vm remotely from your linux machine. You can also use rdesktop, but you may run into issues if you are on CentOS 6. You can start a remote desktop connection using xfreerdp with the following command </p>
+		            </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-10 offset-1">
+                        <div class="row">
+                            <div class="col-12">
+                                <pre style="padding:20px;color: silver; background: black;">xfreerdp -u {{ request.user.username }} -g 1280x720 {{ ip }}</pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="row rowo">
-                    <div class="col-12">
-                        <p> Your initial credentials on the machine are:</p>
+
+                <div class="row" >
+		            <div class="col-10 offset-1">
+                        <span>If you are planning to create a Visual Studio solution, please </span><a href="http://devhelp.lebanon.cd-adapco.com/servicedesk/customer/portal/1">open another service desk ticket</a> <span>requesting a licence for Visual Studio 2013. Please make sure that you apply license to already installed Visual Studio 2013 before you build the solution.</span>
                     </div>
                 </div>
-                <div class="row rowo">
-                    <div class="col-4 col-sm-4 text-right">
-                            User:
-                    </div>
-                    <div class="col-8 ">
-                           {{ request.user.username }}
-                    </div>
-                </div>
-                <div class="row rowo">
-                    <div class="col-4 col-sm-4 text-right">
-                            password:
-                    </div>
-                    <div class="col-8 ">
-                      00ChangeThis
-                    </div>
+
+                <div class="row">
+                    <div class="spacer">&nbsp</div>
                 </div>
             </div>
 		</div>
-
-
-    {% endif %}
-
-
+    </div>
 {% endblock %}
