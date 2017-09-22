@@ -75,16 +75,14 @@ def vm_new(request):
 
             print(config)
             vm = Vm(host_os=config['display_name'],
-                    branch_name=form.cleaned_data['branch_name'],
-                    core_count=form.cleaned_data['core_count'],
-                    memory_size=form.cleaned_data['memory_size'])
+                    branch_name=form.cleaned_data['branch_name'])
             # vm = form.save(commit=False)
             vm.author = request.user
             vm.save()
 
             # calculate values for template, cores, and memory from the submitted form
 
-            celery.fill_lease.delay(vm.pk, config['template_name'], vm.core_count, vm.memory_size)
+            celery.fill_lease.delay(vm.pk, config['template_name'], 3, 16)
 
             return redirect('leases:vm_list')
     else:

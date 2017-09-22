@@ -21,8 +21,6 @@ class Vm(models.Model):
 
     branch_name = models.CharField(max_length=128, default='')
 
-    core_count = models.IntegerField()
-    memory_size = models.IntegerField()
     host_os = models.CharField(max_length=32, default='ubumini')
 
     vm_state = models.CharField(max_length=1, choices=STATES, default='q')
