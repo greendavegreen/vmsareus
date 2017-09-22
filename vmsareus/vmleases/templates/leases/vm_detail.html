@@ -103,7 +103,7 @@ T{% block content %}
                 </div>
                 <div class="row rowo">
                     <div class="col-12">
-                    <p>xfreerdp -u developer -g 1280x720 {{ ip }} </p>
+                    <p>xfreerdp -u {{ request.user.username }} -g 1280x720 {{ ip }} </p>
                     </div>
                 </div>
                 <div class="row rowo">
@@ -116,7 +116,7 @@ T{% block content %}
                             User:
                     </div>
                     <div class="col-8 ">
-                           developer
+                           {{ request.user.username }}
                     </div>
                 </div>
                 <div class="row rowo">

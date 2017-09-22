@@ -18,7 +18,7 @@ from .models import Vm
 def vm_list(request):
 
     if request.user.is_superuser:
-        vms = Vm.objects.all
+        vms = Vm.objects.all()
     else:
         vms = Vm.objects.filter(author=request.user)
 
