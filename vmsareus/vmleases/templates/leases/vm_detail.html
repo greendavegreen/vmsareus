@@ -57,19 +57,19 @@ T{% block content %}
                     <div class="col-8 offset-2">
                         <div class="row">
                             <div class="col-4 text-right">
-                                    User:
+                                    <p>User:</p>
                             </div>
                             <div class="col-8 ">
-                                   {{ request.user.username }}
+                                  <p>{{ request.user.username }}</p>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-4 col-sm-4 text-right">
-                                    Password:
+                                    <p>Password:</p>
                             </div>
                             <div class="col-8 ">
-                              00ChangeThis
+                                <p>{{ vm.starting_password }}</p>
                             </div>
                         </div>
                     </div>

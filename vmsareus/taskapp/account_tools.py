@@ -126,13 +126,15 @@ def setup_ssh_for_user(address, user, pw, id_input):
 def add_user_to_windows_machine(address, user):
     client = None
     try:
+        newpw = '01ChangeThis'
         client = create_client(address, user=settings.VM_DEFUSER, password=settings.VM_DEFPW)
-
-        do_cmd(client, "net user %s 00ChangeThis /add" % (user))
+        do_cmd(client, "net user %s %s /add" % (user, newpw))
         do_cmd(client, "net localgroup administrators %s /add" % (user))
         do_cmd(client, "mkdir /home/%s" % (user))
-
-        return '00ChangeThis'
+    except:
+        return None
+    else:
+        return newpw
     finally:
         if client:
             client.close()

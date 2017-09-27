@@ -76,21 +76,19 @@ def send_notify_email(id):
 @app.task()
 def create_account(id, addr, user):
     from ..vmleases.models import Vm
-    try:
-        time.sleep(10)
-        vm = Vm.objects.get(pk=id)
-        generated_pw = add_user_to_windows_machine(addr, user)
 
-        #set vm password and save
-        if generated_pw:
-            vm.initial_password = generated_pw
-            vm.save()
-            send_notify_email.delay(id)
-        else:
-            vm.vm_state = 'a'
-            vm.save()
-    except ObjectDoesNotExist:
-        print('VM does not exist: {0!s}'.format(id))
+    time.sleep(10)
+    vm = Vm.objects.get(pk=id)
+    generated_pw = add_user_to_windows_machine(addr, user)
+
+    #set vm password and save
+    if generated_pw:
+        vm.starting_password = generated_pw
+        vm.save()
+        send_notify_email.delay(id)
+    else:
+        vm.vm_state = 'a'
+        vm.save()
 
 
 @app.task
