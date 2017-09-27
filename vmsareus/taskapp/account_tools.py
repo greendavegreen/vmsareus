@@ -35,6 +35,7 @@ def create_client(addr, user, password):
     client.connect(addr, 22, user, password)
     return client
 
+
 def do_cmd(client, command):
     print("running " + command)
     stdin, stdout, stderr = client.exec_command(command)
@@ -120,3 +121,18 @@ def setup_ssh_for_user(address, user, pw, id_input):
     new_id = add_key_to_user(user, keypair['public'] + ' ' + machine_id)
     if new_id:
         print('new ssh key id = %s' % new_id)
+
+
+def add_user_to_windows_machine(address, user):
+    client = None
+    try:
+        client = create_client(address, user=settings.VM_DEFUSER, password=settings.VM_DEFPW)
+
+        do_cmd(client, "net user %s 00ChangeThis /add" % (user))
+        do_cmd(client, "net localgroup administrators %s /add" % (user))
+        do_cmd(client, "mkdir /home/%s" % (user))
+
+        return '00ChangeThis'
+    finally:
+        if client:
+            client.close()
