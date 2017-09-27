@@ -10,6 +10,8 @@ from paramiko import AutoAddPolicy
 from paramiko import SSHClient
 from scp import SCPClient
 
+from genpass import gen_dev_password
+
 
 def make_keys():
     keypair = rsa.generate_private_key(
@@ -126,12 +128,13 @@ def setup_ssh_for_user(address, user, pw, id_input):
 def add_user_to_windows_machine(address, user):
     client = None
     try:
-        newpw = '01ChangeThis'
+        newpw = gen_dev_password()
         client = create_client(address, user=settings.VM_DEFUSER, password=settings.VM_DEFPW)
         do_cmd(client, "net user %s %s /add" % (user, newpw))
         do_cmd(client, "net localgroup administrators %s /add" % (user))
         do_cmd(client, "mkdir /home/%s" % (user))
     except:
+        print("exception during add_user_to_windows_machine")
         return None
     else:
         return newpw
