@@ -20,7 +20,8 @@ class Vm(models.Model):
     author = models.ForeignKey('users.User', on_delete=models.CASCADE)
 
     branch_name = models.CharField(max_length=128, default='')
-    host_os = models.CharField(max_length=32, default='ubumini')
+    host_os = models.CharField(max_length=64, default='Windows 10 latest/patched')
+    host_template = models.CharField(max_length=128, default='win10pe-vmsareus')
 
     starting_password = models.CharField(max_length=128, default='')
     stash_key_id = models.IntegerField(default=0)

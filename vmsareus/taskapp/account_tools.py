@@ -130,7 +130,7 @@ def add_user_to_windows_machine(address, user):
     try:
         newpw = gen_dev_password()
         client = create_client(address, user=settings.VM_DEFUSER, password=settings.VM_DEFPW)
-        do_cmd(client, "net user %s %s /add" % (user, newpw))
+        do_cmd(client, "net user %s %s /add /Y" % (user, newpw))
         do_cmd(client, "net localgroup administrators %s /add" % (user))
         do_cmd(client, "mkdir /home/%s" % (user))
     except:

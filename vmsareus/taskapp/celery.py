@@ -81,7 +81,6 @@ def create_account(id, addr, user):
     vm = Vm.objects.get(pk=id)
     generated_pw = add_user_to_windows_machine(addr, user)
 
-    #set vm password and save
     if generated_pw:
         vm.starting_password = generated_pw
         vm.save()
@@ -115,35 +114,31 @@ def wait_for_ip(id):
 
 
 @app.task
-def fill_lease(id, template_name, core_count, mem_gigs):
+def fill_lease(id):
     from ..vmleases.models import Vm
+    time.sleep(5)
+    vm = Vm.objects.get(pk=id)
+
     try:
-        time.sleep(5)
-        obj = Vm.objects.get(pk=id)
+        validate_config()
+        vm.vm_state = 'c'
+        vm.save()
 
-        if validate_config():
-            obj.vm_state = 'c'
-            obj.save()
-
-            name = 'dev-vm-{}-{}'.format(obj.author.username, int(time.time()))
-            if create_cluster_vm(template_name, core_count, mem_gigs, name):
-                obj.vm_state = 'r'
-                obj.vm_name = name
-                obj.save()
-                print('VM created:{} status {}'.format(name, obj.vm_state))
-                wait_for_ip.delay(id)
-            else:
-                print('call to vm creation failed')
-                obj.vm_state = 'a'
-                obj.save()
+        name = 'dev-vm-{}-{}'.format(vm.author.username, int(time.time()))
+        if create_cluster_vm(vm.host_template, name):
+            vm.vm_state = 'p'
+            vm.vm_name = name
+            vm.save()
+            print('VM created:{} status {}'.format(name, vm.vm_state))
+            wait_for_ip.delay(id)
         else:
-            print("invalid config")
-            obj.vm_state = 'a'
-            obj.save()
-    except ObjectDoesNotExist:
-        print('VM does not exist: {0!s}'.format(id))
-    pass
-
+            print('call to vm creation failed')
+            vm.vm_state = 'a'
+            vm.save()
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise()
 
 @app.task
 def delete_vm(vm_name):
