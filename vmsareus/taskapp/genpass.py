@@ -14,6 +14,5 @@ def gen_dev_password():
     wordfile = xp.locate_wordfile()
     mywords = xp.generate_wordlist(wordfile=wordfile, min_length=3, max_length=8)
 
-    res = xp.generate_xkcdpassword(mywords, numwords=3, acrostic='dev')
-    # create a password with the acrostic "face"
+    res = xp.generate_xkcdpassword(mywords, numwords=3)
     return capitalize_first_letter(res)

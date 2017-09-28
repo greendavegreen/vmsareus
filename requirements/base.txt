@@ -49,3 +49,12 @@ redis>=2.10.5
 
 
 # Your custom requirements go here
+
+celery==4.1.0
+cryptography==2.0.3
+paramiko==2.2.1
+scp==0.10.2
+xkcdpass==1.12.0
+pyvim==0.0.21
+pyvmomi==6.5.0.2017.5.post1
+

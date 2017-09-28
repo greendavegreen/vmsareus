@@ -38,12 +38,13 @@ def create_client(addr, user, password):
     return client
 
 
-def do_cmd(client, command):
+def do_cmd(client, command, verbose=True):
     print("running " + command)
     stdin, stdout, stderr = client.exec_command(command)
     stdin.close()
     for line in stdout.read().splitlines():
-        print('remote-output -> %s' % (line))
+        if verbose:
+            print('remote-output -> %s' % (line))
 
 
 def copy_file_to_target(address, user, password, srcName, dstName):
@@ -130,7 +131,7 @@ def add_user_to_windows_machine(address, user):
     try:
         newpw = gen_dev_password()
         client = create_client(address, user=settings.VM_DEFUSER, password=settings.VM_DEFPW)
-        do_cmd(client, "net user %s %s /add /Y" % (user, newpw))
+        do_cmd(client, "net user %s %s /add /Y" % (user, newpw), verbose=False)
         do_cmd(client, "net localgroup administrators %s /add" % (user))
         do_cmd(client, "mkdir /home/%s" % (user))
     except:

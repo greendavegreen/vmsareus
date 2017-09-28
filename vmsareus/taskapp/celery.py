@@ -55,90 +55,85 @@ def debug_task(self):
 @app.task
 def send_notify_email(id):
     from ..vmleases.models import Vm
+    time.sleep(5)
+    vm = Vm.objects.get(pk=id)
     try:
-        time.sleep(10)
-        obj = Vm.objects.get(pk=id)
-
-        full_url = ''.join(['http://', get_current_site(None).domain, reverse('leases:vm_detail', args=[obj.id])])
-        print('sending mail to {} about {}'.format(obj.author.email, full_url))
-
+        full_url = ''.join(['http://', get_current_site(None).domain, reverse('leases:vm_detail', args=[vm.id])])
         send_mail(
-            'Requested VM {} is ready!'.format(obj.vm_name),
+            'Requested VM {} is ready!'.format(vm.vm_name),
             'Your VM has been cloned! More info can be found at {}'.format(full_url),
             'vmsareus@vmsareus.lebanon.cd-adapco.com',
-            [obj.author.email],
+            [vm.author.email],
             fail_silently=False,
         )
-    except ObjectDoesNotExist:
-        print('VM does not exist: {0!s}'.format(id))
-
+    except:
+        print('error sending mail to {} about {}'.format(vm.author.email, full_url))
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        print('sent mail to {} about {}'.format(vm.author.email, full_url))
+        vm.vm_state = 'r'
+        vm.save()
 
 @app.task()
 def create_account(id, addr, user):
     from ..vmleases.models import Vm
-
-    time.sleep(10)
+    time.sleep(5)
     vm = Vm.objects.get(pk=id)
-    generated_pw = add_user_to_windows_machine(addr, user)
-
-    if generated_pw:
+    try:
+        generated_pw = add_user_to_windows_machine(addr, user)
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
         vm.starting_password = generated_pw
         vm.save()
         send_notify_email.delay(id)
-    else:
-        vm.vm_state = 'a'
-        vm.save()
+
 
 
 @app.task
 def wait_for_ip(id):
     from ..vmleases.models import Vm
+    time.sleep(5)
+    vm = Vm.objects.get(pk=id)
     try:
-        time.sleep(5)
-        vm = Vm.objects.get(pk=id)
-
         while True:
             info = get_vm_info(vm.vm_name)
-            if info:
-                if info['ip']:
-                    ip = info['ip']
-                    print('{} has ip {}'.format(vm.vm_name, info['ip']))
-                    create_account.delay(id, ip, vm.author.username)
-                    break
-            else:
-                print('vm not found in vcenter {}'.format(vm.vm_name))
+            if info['ip']:
                 break
             time.sleep(5)
-    except ObjectDoesNotExist:
-        print('VM does not exist: {0!s}'.format(id))
-
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        ip = info['ip']
+        print('{} has ip {}'.format(vm.vm_name, info['ip']))
+        create_account.delay(id, ip, vm.author.username)
 
 @app.task
 def fill_lease(id):
     from ..vmleases.models import Vm
     time.sleep(5)
     vm = Vm.objects.get(pk=id)
-
     try:
         validate_config()
         vm.vm_state = 'c'
         vm.save()
-
         name = 'dev-vm-{}-{}'.format(vm.author.username, int(time.time()))
-        if create_cluster_vm(vm.host_template, name):
-            vm.vm_state = 'p'
-            vm.vm_name = name
-            vm.save()
-            print('VM created:{} status {}'.format(name, vm.vm_state))
-            wait_for_ip.delay(id)
-        else:
-            print('call to vm creation failed')
-            vm.vm_state = 'a'
-            vm.save()
+        create_cluster_vm(vm.host_template, name)
     except:
         vm.vm_state = 'a'
         vm.save()
-        raise()
+        raise
+    else:
+        vm.vm_state = 'p'
+        vm.vm_name = name
+        vm.save()
+        wait_for_ip.delay(id)
 
 @app.task
 def delete_vm(vm_name):

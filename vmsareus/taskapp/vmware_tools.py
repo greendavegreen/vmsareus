@@ -14,16 +14,22 @@ if not settings.configured:
     # set the default Django settings module for the 'celery' program.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')  # pragma: no cover
 
+class ConfigException(Exception):
+    def __init__(self, value):
+        self.parameter = value
+    def __str__(self):
+        return repr(self.parameter)
 
 def validate_config():
-    return not (settings.VCENTER_FOLDER is None or
-                settings.VCENTER_DATASTORE is None or
-                settings.VCENTER_CLUSTER is None or
-                settings.VCENTER_HOST is None or
-                settings.VCENTER_USER is None or
-                settings.VCENTER_PASSWORD is None or
-                settings.VCENTER_PORT is None or
-                settings.VCENTER_DATACENTER is None)
+    if (settings.VCENTER_FOLDER is None or
+            settings.VCENTER_DATASTORE is None or
+            settings.VCENTER_CLUSTER is None or
+            settings.VCENTER_HOST is None or
+            settings.VCENTER_USER is None or
+            settings.VCENTER_PASSWORD is None or
+            settings.VCENTER_PORT is None or
+            settings.VCENTER_DATACENTER is None):
+        raise ConfigException('Configuration of required VCENTER value missing')
 
 
 def connect():
@@ -63,33 +69,27 @@ def find_or_create_folder(content, foldername):
 
 
 def delete_if_exists(vm_name):
-    if validate_config():
-        print("valid config")
-    else:
-        print("invalid config")
-        return
+    validate_config()
 
     si = connect()
 
     if si:
-        print("connection made to vcenter")
+        #print("connection made to vcenter")
         atexit.register(Disconnect, si)
         content = si.RetrieveContent()
 
         vm = get_obj(content, [vim.VirtualMachine], vm_name)
         if vm:
-            print("Found: {0}".format(vm.name))
+            print("Found Delete Candidate: {0}".format(vm.name))
             print("The current powerState is: {0}".format(vm.runtime.powerState))
             if format(vm.runtime.powerState) == "poweredOn":
                 print("Attempting to power off {0}".format(vm.name))
                 task = vm.PowerOffVM_Task()
                 tasks.wait_for_tasks(si, [task])
                 print("{0}".format(task.info.state))
-
-            print("Destroying VM from vSphere.")
+            print("Destroying VM {0}".format(vm.name))
             task = vm.Destroy_Task()
             tasks.wait_for_tasks(si, [task])
-            print("Done.")
         else:
             print("could not locate VM named: " + vm_name)
 
@@ -104,11 +104,11 @@ def getsummary(result):
 
 
 def print_result(task):
-    print(task.info.state)
-    print(task.info.key)
+    #print(task.info.state)
+    #print(task.info.key)
     print(task.info.descriptionId)
-    if isinstance(task.info.reason, vim.TaskReasonUser):
-        print(task.info.reason.userName)
+    #if isinstance(task.info.reason, vim.TaskReasonUser):
+    #    print(task.info.reason.userName)
 
     summary = getsummary(task.info.result)
     print("Name       : ", summary.config.name)
@@ -121,63 +121,58 @@ def print_result(task):
             print("IP         : ", ip)
 
 
-def create_cluster_vm(template_name, cpu_count, mem_gigs, vm_name):
-    if validate_config():
-        si = connect()
-        if si:
-            # print("connection made to vcenter")
-            atexit.register(Disconnect, si)
-            content = si.RetrieveContent()
+def create_cluster_vm(template_name, vm_name):
+    cpu_count = 3
+    mem_gigs = 16
+    validate_config()
+    si = connect()
+    if si:
+        atexit.register(Disconnect, si)
+        content = si.RetrieveContent()
 
-            template = get_obj(content, [vim.VirtualMachine], template_name)
-            pod = get_obj(content, [vim.StoragePod], settings.VCENTER_DATASTORE)
-            folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
-            resource_pool = get_obj(content, [vim.ResourcePool], settings.VCENTER_POOL)
+        template = get_obj(content, [vim.VirtualMachine], template_name)
+        pod = get_obj(content, [vim.StoragePod], settings.VCENTER_DATASTORE)
+        folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
+        resource_pool = get_obj(content, [vim.ResourcePool], settings.VCENTER_POOL)
 
-            cloneSpec = vim.vm.CloneSpec()
-            cloneSpec.powerOn = True
+        cloneSpec = vim.vm.CloneSpec()
+        cloneSpec.powerOn = True
 
-            cloneSpec.config = vim.vm.ConfigSpec()
-            cloneSpec.config.name = vm_name
-            cloneSpec.config.numCPUs = cpu_count
-            cloneSpec.config.memoryMB = mem_gigs * 1024
+        cloneSpec.config = vim.vm.ConfigSpec()
+        cloneSpec.config.name = vm_name
+        cloneSpec.config.numCPUs = cpu_count
+        cloneSpec.config.memoryMB = mem_gigs * 1024
 
-            cloneSpec.location = vim.vm.RelocateSpec()
-            cloneSpec.location.pool = resource_pool
+        cloneSpec.location = vim.vm.RelocateSpec()
+        cloneSpec.location.pool = resource_pool
 
-            storagespec = vim.storageDrs.StoragePlacementSpec()
-            storagespec.vm = template
-            storagespec.type = 'clone'
-            storagespec.folder = folder
-            storagespec.cloneSpec = cloneSpec
-            storagespec.cloneName = vm_name
-            storagespec.podSelectionSpec = vim.storageDrs.PodSelectionSpec()
-            storagespec.podSelectionSpec.storagePod = pod
+        storagespec = vim.storageDrs.StoragePlacementSpec()
+        storagespec.vm = template
+        storagespec.type = 'clone'
+        storagespec.folder = folder
+        storagespec.cloneSpec = cloneSpec
+        storagespec.cloneName = vm_name
+        storagespec.podSelectionSpec = vim.storageDrs.PodSelectionSpec()
+        storagespec.podSelectionSpec.storagePod = pod
 
-            rec = content.storageResourceManager.RecommendDatastores(storageSpec=storagespec)
+        rec = content.storageResourceManager.RecommendDatastores(storageSpec=storagespec)
+        rec_key = rec.recommendations[0].key
 
-            rec_key = rec.recommendations[0].key
-            print("starting Apply")
-            task = content.storageResourceManager.ApplyStorageDrsRecommendation_Task(rec_key)
+        task = content.storageResourceManager.ApplyStorageDrsRecommendation_Task(rec_key)
 
-            tasks.wait_for_tasks(si, [task])
-            result = (task.info.state == 'success')
-            print_result(task)
-            return result
-        else:
-            print("Could not connect to the specified host using specified username and password")
+        print("starting Apply")
+        tasks.wait_for_tasks(si, [task])
 
-    return False
+        print_result(task)
+
+        if task.info.state != 'success':
+            raise RuntimeError('failed during call to ApplyStorageDrsRecommendation_Task')
+    else:
+        raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
 def get_vm_info(vm_name):
-    if validate_config():
-        # print("valid config")
-        pass
-    else:
-        print("invalid config")
-        return None
-
+    validate_config()
     si = connect()
 
     if si:
@@ -190,14 +185,13 @@ def get_vm_info(vm_name):
                 ip = vm.summary.guest.ipAddress
             else:
                 ip = 'not assigned'
+
             return {'os': vm.summary.config.guestFullName,
                     'power': vm.summary.runtime.powerState,
                     'ip': ip}
         else:
-            print("could not find vm " + vm_name)
+            raise RuntimeError("could not find vm " + vm_name)
     else:
-        print(datetime.now().strftime('%H:%M:%S ') + "connection to vcenter failed")
-
-    return None
+        raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
