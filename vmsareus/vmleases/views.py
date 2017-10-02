@@ -9,9 +9,12 @@ from django.shortcuts import get_object_or_404, render, redirect
 
 from vmsareus.taskapp.celery import create_account
 from vmsareus.taskapp.celery import delete_vm
+from vmsareus.taskapp.celery import clean_stash_key
+
 from vmsareus.taskapp.celery import fill_lease
 from vmsareus.taskapp.celery import get_vm_info
 from vmsareus.taskapp.celery import send_notify_email
+from vmsareus.taskapp.celery import setup_ssh
 from vmsareus.taskapp.celery import wait_for_ip
 from vmsareus.vmleases.forms import ExampleForm
 from .models import Vm
@@ -89,6 +92,7 @@ def vm_new(request):
             chain(fill_lease.si(vm_id),
                   wait_for_ip.si(vm_id),
                   create_account.si(vm_id),
+                  setup_ssh.si(vm_id),
                   send_notify_email.si(vm_id)).apply_async()
 
             return redirect('leases:vm_list')
@@ -100,6 +104,7 @@ def vm_new(request):
 def vm_remove(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
     delete_vm.delay(vm.vm_name)
+    clean_stash_key.delay(vm.stash_key_id)
     vm.delete()
     return redirect('leases:vm_list')
 

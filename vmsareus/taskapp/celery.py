@@ -7,11 +7,11 @@ from celery import Celery
 from django.apps import apps, AppConfig
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.urls import reverse
 
-from .account_tools import add_user_to_windows_machine
+from .account_tools import add_user_to_windows_machine, delete_stash_key
+from .account_tools import setup_ssh_for_user
 from .vmware_tools import create_cluster_vm
 from .vmware_tools import delete_if_exists
 from .vmware_tools import get_vm_info
@@ -96,6 +96,26 @@ def create_account(id):
         #send_notify_email.delay(id)
 
 
+@app.task()
+def setup_ssh(id):
+    from ..vmleases.models import Vm
+    time.sleep(5)
+    vm = Vm.objects.get(pk=id)
+    try:
+        info = get_vm_info(vm.vm_name)
+        addr = info['ip']
+        key_id = setup_ssh_for_user(addr,
+                                    vm.author.username,
+                                    vm.starting_password,
+                                    id)
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        vm.stash_key_id = key_id
+        vm.save()
+
 
 @app.task
 def wait_for_ip(id):
@@ -142,3 +162,6 @@ def fill_lease(id):
 def delete_vm(vm_name):
     delete_if_exists(vm_name)
 
+@app.task
+def clean_stash_key(key_id):
+    delete_stash_key(key_id)

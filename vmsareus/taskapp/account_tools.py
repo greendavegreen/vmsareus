@@ -53,7 +53,6 @@ def copy_file_to_target(address, user, password, srcName, dstName):
         ssh = create_client(address, user, password)
         with SCPClient(ssh.get_transport()) as scp:
             scp.put(srcName, dstName)
-            print ("copied %s to %s" % (srcName, dstName))
     finally:
         ssh.close()
 
@@ -86,6 +85,22 @@ def set_ssh_perms(address,user,pw):
 
 
 STASH_SSH_KEY_URL = 'http://stash.lebanon.cd-adapco.com/rest/ssh/1.0/keys'
+STASH_SSH_KEY_DELETE_URL = 'http://stash.lebanon.cd-adapco.com/rest/ssh/1.0/keys/%s'
+
+
+def delete_stash_key(key_id):
+    user = settings.STASH_USER
+    pwd = settings.STASH_PW
+    url = STASH_SSH_KEY_DELETE_URL % key_id
+
+    # headers = {'X-Atlassian-Token': 'nocheck',
+    #            'Accept': 'application/json',
+    #            'Content-Type': 'application/json'}
+    print(url)
+    r = requests.delete(url, auth=(user, pwd))
+
+    if r.status_code != 204:
+        raise RuntimeError("error posting key %s" % r.status_code)
 
 
 def add_key_to_user(target_user, key_data):
@@ -100,45 +115,47 @@ def add_key_to_user(target_user, key_data):
     r = requests.post(url, data=json.dumps(payload), headers=headers, auth=(user, pwd))
 
     if r.status_code == 201:
-        print("successfully added key")
-        new_key_id = r.json()['id']
-        return new_key_id
+        return r.json()['id']
     else:
-        print("error posting key %s" % r.status_code)
-        return None
+        raise RuntimeError("error posting key %s" % r.status_code)
 
 
 def setup_ssh_for_user(address, user, pw, id_input):
-    make_ssh_dir(address, user, pw)
+    try:
+        make_ssh_dir(address, user, pw)
 
-    keypair = make_keys()
-    copy_bytes_to_target(address, user, pw,
-                         keypair['private'],
-                         '/home/davidgr/.ssh/id_rsa')
-    copy_bytes_to_target(address, user, pw,
-                         keypair['public'],
-                         '/home/davidgr/.ssh/id_rsa.pub')
+        keypair = make_keys()
+        copy_bytes_to_target(address, user, pw,
+                             keypair['private'],
+                             '/home/davidgr/.ssh/id_rsa')
+        copy_bytes_to_target(address, user, pw,
+                             keypair['public'],
+                             '/home/davidgr/.ssh/id_rsa.pub')
 
-    set_ssh_perms(address, user, pw)
+        set_ssh_perms(address, user, pw)
 
-    machine_id = 'vm_%s@vmsareus' % id_input
-    new_id = add_key_to_user(user, keypair['public'] + ' ' + machine_id)
-    if new_id:
+        machine_id = 'vm_%s@vmsareus' % id_input
+        new_id = add_key_to_user(user, keypair['public'] + ' ' + machine_id)
+    except:
+        raise
+    else:
         print('new ssh key id = %s' % new_id)
+        return new_id
 
 
 def add_user_to_windows_machine(address, new_user):
     client = None
     try:
-        print('adding account %s to machine %s' % (address, new_user))
         client = create_client(address, user=settings.VM_DEFUSER, password=settings.VM_DEFPW)
         new_pw = gen_dev_password()
-        do_cmd(client, "net user %s %s /add /Y" % (new_user, new_pw), verbose=False)
+        do_cmd(client, "net user %s %s /add /Y" % (new_user, new_pw))
         do_cmd(client, "net localgroup administrators %s /add" % (new_user))
         do_cmd(client, "mkdir /home/%s" % (new_user))
     except:
+        print('account add failed for machine %s account %s' % (address, new_user))
         raise
     else:
+        print('account added on machine %s account %s' % (address, new_user))
         return new_pw
     finally:
         if client:
