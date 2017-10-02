@@ -17,19 +17,20 @@ T{% block content %}
             </div>
         </div>
     </div>
-    <div class="row ">
-        <div class="spacer">&nbsp</div>
+
+    <div class="row" style="margin-top:30px;">
+        <div class="col-10 offset-1" >
+            <h2>Leasing</h2>
+        </div>
     </div>
+    <div class="col-10 offset-1 border-top-1">
 
-    <div class="row rowg">
+        <div class="row">
+            <div class="col-12">
 
-            <div class="col-lg-6 offset-lg-3">
-                <div class="row">
-                    <div class="col-6 "><h3>Leasing</h3></div>
-                </div>
                 <div class="row">
                     <div class="col-12">
-                        <p>Developer VMs are assigned a lease duration of 1 month.  When the lease period expires, the machine will be reclaimed by the recycling process.  If you wish to keep this VM longer, you must extend the lease duration using this provided button.</p>
+                        <p style="margin-top:10px">Developer VMs are assigned a lease duration of 1 month.  When the lease period expires, the machine will be reclaimed by the recycling process.  If you wish to keep this VM longer, you must extend the lease duration using this provided button.</p>
                     </div>
                 </div>
                 <div class="row rowo">
@@ -49,54 +50,51 @@ T{% block content %}
                         {{ vm.expires_date | date:"E d Y" }}
                     </div>
                 </div>
-
-                <div class="hspacer">&nbsp</div>
-
-            </div>
-
-    </div>
-
-    <div class="row rowg">
-        <div class="col-lg-6 offset-lg-3">
-            <a class="btn btn-success" href="{% url 'leases:vm_extend' pk=vm.pk %}">
-                Extend Lease
-            </a>
-        </div>
-    </div>
-
-    <div class="row rowg">
-        <div class="spacer">&nbsp</div>
-    </div>
-
-    <div class="row ">
-        <div class="spacer">&nbsp</div>
-    </div>
-
-        <div class="row rowg">
-
-            <div class="col-lg-6 offset-lg-3">
                 <div class="row">
-                    <div class="col-6 "><h3>Early Termination</h3></div>
+                    <div class="hspacer">&nbsp</div>
                 </div>
                 <div class="row">
-                    <div class="col-12">
-                        <p>Should you finish with this VM before its lease expires, you are always welcome to terminate it early.  Use the provided button to return the bits to the recycler.</p>
+                    <div class="col-sm-6 offset-sm-3">
+                        <a class="btn btn-success" href="{% url 'leases:vm_extend' pk=vm.pk %}">
+                            Extend Lease
+                        </a>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="hspacer">&nbsp</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="row" style="margin-top:30px;">
+        <div class="col-10 offset-1" >
+            <h2>Early Termination</h2>
+        </div>
+    </div>
+    <div class="col-10 offset-1 border-top-1">
+
+        <div class="row">
+            <div class="col-12">
+                <p style="margin-top:10px">Should you finish with this VM before its lease expires, we request that you terminate it early.  Use the provided button to return the bits to the recycler.</p>
             </div>
         </div>
 
-        <div class="row rowg">
-            <div class="col-lg-6 offset-lg-3">
+        <div class="row">
+            <div class="hspacer">&nbsp</div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6 offset-sm-3">
                 <button class="btn btn-danger" data-href="{% url 'leases:vm_remove' pk=vm.pk %}" data-toggle="modal" data-target="#confirm-delete">
                     Delete this VM
-            </button>
+                </button>
+            </div>
         </div>
+
         <div class="row">
-            <div class="spacer">&nbsp</div>
+            <div class="hspacer">&nbsp</div>
         </div>
-    </div>
 
 
     </div>

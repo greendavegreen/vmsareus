@@ -181,14 +181,13 @@ def get_vm_info(vm_name):
         folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
         vm = get_obj_in_folder(content, folder, [vim.VirtualMachine], vm_name)
         if vm:
-            if vm.summary.guest is not None:
-                ip = vm.summary.guest.ipAddress
-            else:
-                ip = 'not assigned'
+            all_ips = [ip.ipAddress for nic in vm.guest.net for ip in nic.ipConfig.ipAddress if ip.state == 'preferred']
+            # ip = [ip.ipAddress for nic in guest.net if nic.ipConfig is not None for ip in nic.ipConfig.ipAddress if ip.state == 'preferred']
+            ip_4s = [item for item in all_ips if '.' in item]
 
             return {'os': vm.summary.config.guestFullName,
                     'power': vm.summary.runtime.powerState,
-                    'ip': ip}
+                    'ip': ip_4s[0] if ip_4s else None}
         else:
             raise RuntimeError("could not find vm " + vm_name)
     else:

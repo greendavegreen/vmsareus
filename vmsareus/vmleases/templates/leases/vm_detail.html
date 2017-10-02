@@ -17,17 +17,16 @@ T{% block content %}
             </div>
         </div>
     </div>
-    <div class="row" style="margin-top:30px;">
-        <div class="col-12" >
-            <h2 class="text-center">{{ vm.vm_name }}</h2>
-        </div>
-    </div>
     <div class="col-10 offset-1 border-top-1">
 
         <div class="row">
             <div class="col-12">
                 <div class="row">
-                    <div class="col-12"><img src="{{STATIC_URL}}images/Windows_10_Logo.svg" width="240" style="margin-top:10px;"></div>
+                    <div class="col-12">
+                        <img src="{{STATIC_URL}}images/Windows_10_Logo.svg" width="240" style="margin-top:10px;"
+                            data-toggle="popover" data-trigger="hover" data-placement="bottom"
+                            data-content="Operating System on this machine.">
+                    </div>
                 </div>
             </div>
         </div>
@@ -37,7 +36,7 @@ T{% block content %}
                     <div class="col-2 col-lg-1">
                         <img src="{{STATIC_URL}}images/branch-dark.svg" height="50"
                              data-toggle="popover" data-trigger="hover" data-placement="right"
-                             data-content="Feature branch to be checked out and built on this machine.">
+                             data-content="Feature branch on this machine.">
                     </div>
                     <div class="col-9 ">
                         <p>{{ vm.branch_name }}</p>

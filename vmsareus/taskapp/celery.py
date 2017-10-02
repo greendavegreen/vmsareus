@@ -77,12 +77,15 @@ def send_notify_email(id):
         vm.save()
 
 @app.task()
-def create_account(id, addr, user):
+def create_account(id):
     from ..vmleases.models import Vm
     time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
-        generated_pw = add_user_to_windows_machine(addr, user)
+        info = get_vm_info(vm.vm_name)
+        addr = info['ip']
+        new_user = vm.author.username
+        generated_pw = add_user_to_windows_machine(addr, new_user)
     except:
         vm.vm_state = 'a'
         vm.save()
@@ -90,7 +93,7 @@ def create_account(id, addr, user):
     else:
         vm.starting_password = generated_pw
         vm.save()
-        send_notify_email.delay(id)
+        #send_notify_email.delay(id)
 
 
 
@@ -112,7 +115,7 @@ def wait_for_ip(id):
     else:
         ip = info['ip']
         print('{} has ip {}'.format(vm.vm_name, info['ip']))
-        create_account.delay(id, ip, vm.author.username)
+        #create_account.delay(id)
 
 @app.task
 def fill_lease(id):
@@ -133,7 +136,7 @@ def fill_lease(id):
         vm.vm_state = 'p'
         vm.vm_name = name
         vm.save()
-        wait_for_ip.delay(id)
+        #wait_for_ip.delay(id)
 
 @app.task
 def delete_vm(vm_name):

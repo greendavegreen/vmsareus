@@ -30,16 +30,17 @@ def make_keys():
     return {'private': private_key, 'public': public_key}
 
 
-def create_client(addr, user, password):
+def create_client(address, user, password):
     client = SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(AutoAddPolicy)
-    client.connect(addr, 22, user, password)
+    client.connect(address, 22, user, password)
     return client
 
 
-def do_cmd(client, command, verbose=True):
-    print("running " + command)
+def do_cmd(client, command, verbose=False):
+    if verbose:
+        print("running " + command)
     stdin, stdout, stderr = client.exec_command(command)
     stdin.close()
     for line in stdout.read().splitlines():
@@ -126,19 +127,19 @@ def setup_ssh_for_user(address, user, pw, id_input):
         print('new ssh key id = %s' % new_id)
 
 
-def add_user_to_windows_machine(address, user):
+def add_user_to_windows_machine(address, new_user):
     client = None
     try:
-        newpw = gen_dev_password()
+        print('adding account %s to machine %s' % (address, new_user))
         client = create_client(address, user=settings.VM_DEFUSER, password=settings.VM_DEFPW)
-        do_cmd(client, "net user %s %s /add /Y" % (user, newpw), verbose=False)
-        do_cmd(client, "net localgroup administrators %s /add" % (user))
-        do_cmd(client, "mkdir /home/%s" % (user))
+        new_pw = gen_dev_password()
+        do_cmd(client, "net user %s %s /add /Y" % (new_user, new_pw), verbose=False)
+        do_cmd(client, "net localgroup administrators %s /add" % (new_user))
+        do_cmd(client, "mkdir /home/%s" % (new_user))
     except:
-        print("exception during add_user_to_windows_machine")
-        return None
+        raise
     else:
-        return newpw
+        return new_pw
     finally:
         if client:
             client.close()

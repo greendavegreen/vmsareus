@@ -1,12 +1,18 @@
 import json
-import os
 
+import os
+from celery import chain
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 
-from vmsareus.taskapp import celery
+from vmsareus.taskapp.celery import create_account
+from vmsareus.taskapp.celery import delete_vm
+from vmsareus.taskapp.celery import fill_lease
+from vmsareus.taskapp.celery import get_vm_info
+from vmsareus.taskapp.celery import send_notify_email
+from vmsareus.taskapp.celery import wait_for_ip
 from vmsareus.vmleases.forms import ExampleForm
 from .models import Vm
 
@@ -35,7 +41,7 @@ def vm_list(request):
 def vm_detail(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
 
-    info = celery.get_vm_info(vm.vm_name)
+    info = get_vm_info(vm.vm_name)
     if info:
         guest_os = info['os']
         guest_power = info['power']
@@ -72,18 +78,18 @@ def vm_new(request):
         form = ExampleForm(request.POST)
         if form.is_valid():
             config = get_os_info(form.cleaned_data['host_os'])
-
-            print(config)
-            vm = Vm(host_os=config['display_name'],
+            vm = Vm(author=request.user,
+                    host_os=config['display_name'],
                     host_template=config['template_name'],
                     branch_name=form.cleaned_data['branch_name'])
-            # vm = form.save(commit=False)
-            vm.author = request.user
             vm.save()
 
-            # calculate values for template, cores, and memory from the submitted form
-
-            celery.fill_lease.delay(vm.pk)
+            # execute serially, with any exception causing abort of the entire chain
+            vm_id = vm.pk
+            chain(fill_lease.si(vm_id),
+                  wait_for_ip.si(vm_id),
+                  create_account.si(vm_id),
+                  send_notify_email.si(vm_id)).apply_async()
 
             return redirect('leases:vm_list')
     else:
@@ -93,7 +99,7 @@ def vm_new(request):
 @login_required
 def vm_remove(request, pk):
     vm = get_object_or_404(Vm, pk=pk)
-    celery.delete_vm.delay(vm.vm_name)
+    delete_vm.delay(vm.vm_name)
     vm.delete()
     return redirect('leases:vm_list')
 
