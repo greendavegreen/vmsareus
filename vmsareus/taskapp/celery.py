@@ -12,10 +12,13 @@ from django.urls import reverse
 
 from .account_tools import add_user_to_windows_machine, delete_stash_key
 from .account_tools import setup_ssh_for_user
+from .vmware_tools import clone_vm
 from .vmware_tools import create_cluster_vm
 from .vmware_tools import delete_if_exists
 from .vmware_tools import get_vm_info
 from .vmware_tools import validate_config
+from .bus_logic import make_dev_drive_for_branch
+from .bus_logic import attach_dev_drive
 
 if not settings.configured:
     # set the default Django settings module for the 'celery' program.
@@ -147,7 +150,8 @@ def fill_lease(id):
         vm.vm_state = 'c'
         vm.save()
         name = 'dev-vm-{}-{}'.format(vm.author.username, int(time.time()))
-        create_cluster_vm(vm.host_template, name)
+        clone_vm(vm.host_template, name)
+        #create_cluster_vm(vm.host_template, name)
     except:
         vm.vm_state = 'a'
         vm.save()
@@ -165,3 +169,20 @@ def delete_vm(vm_name):
 @app.task
 def clean_stash_key(key_id):
     delete_stash_key(key_id)
+
+
+@app.task()
+def create_drive(id):
+    from ..vmleases.models import Vm
+    time.sleep(5)
+    vm = Vm.objects.get(pk=id)
+    try:
+        validate_config()
+        make_dev_drive_for_branch(vm.branch_name, id)
+        attach_dev_drive(vm.vm_name, vm.branch_name, id)
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        pass

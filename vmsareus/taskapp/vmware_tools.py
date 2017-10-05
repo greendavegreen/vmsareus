@@ -1,18 +1,17 @@
 import atexit
-import math
 import ssl
-import time
-from datetime import datetime
 
 import os
 from django.conf import settings
 from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
+
 from .tools import tasks
 
 if not settings.configured:
     # set the default Django settings module for the 'celery' program.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.local')  # pragma: no cover
+
 
 class ConfigException(Exception):
     def __init__(self, value):
@@ -20,9 +19,10 @@ class ConfigException(Exception):
     def __str__(self):
         return repr(self.parameter)
 
+
 def validate_config():
     if (settings.VCENTER_FOLDER is None or
-            settings.VCENTER_DATASTORE is None or
+            settings.VCENTER_POD is None or
             settings.VCENTER_CLUSTER is None or
             settings.VCENTER_HOST is None or
             settings.VCENTER_USER is None or
@@ -69,8 +69,6 @@ def find_or_create_folder(content, foldername):
 
 
 def delete_if_exists(vm_name):
-    validate_config()
-
     si = connect()
 
     if si:
@@ -120,19 +118,48 @@ def print_result(task):
         if ip:
             print("IP         : ", ip)
 
+def clone_vm(template_name, vm_name):
+        # content, template, vm_name, si,
+        # datacenter_name, vm_folder, datastore_name,
+        # cluster_name, resource_pool, power_on):
 
-def create_cluster_vm(template_name, vm_name):
-    cpu_count = 3
-    mem_gigs = 16
-    validate_config()
     si = connect()
     if si:
         atexit.register(Disconnect, si)
         content = si.RetrieveContent()
 
-        template = get_obj(content, [vim.VirtualMachine], template_name)
-        pod = get_obj(content, [vim.StoragePod], settings.VCENTER_DATASTORE)
         folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
+        template = get_obj_in_folder(content, folder, [vim.VirtualMachine], template_name)
+        resource_pool = get_obj(content, [vim.ResourcePool], settings.VCENTER_POOL)
+
+        # for now you can use the same datastore as the template
+        datastore = get_obj(content, [vim.Datastore], template.datastore[0].info.name)
+
+        relospec = vim.vm.RelocateSpec(datastore=datastore, pool=resource_pool)
+        clonespec = vim.vm.CloneSpec(location=relospec, powerOn=True)
+
+        print ("cloning VM...")
+        task = template.Clone(folder=folder, name=vm_name, spec=clonespec)
+        tasks.wait_for_tasks(si, [task])
+        print_result(task)
+
+        if task.info.state != 'success':
+            raise RuntimeError('failed during call to Clone')
+    else:
+        raise RuntimeError('Could not connect to vcenter using specified username and password')
+
+
+def create_cluster_vm(template_name, vm_name):
+    cpu_count = 3
+    mem_gigs = 16
+    si = connect()
+    if si:
+        atexit.register(Disconnect, si)
+        content = si.RetrieveContent()
+
+        folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
+        template = get_obj_in_folder(content, folder, [vim.VirtualMachine], template_name)
+        pod = get_obj(content, [vim.StoragePod], settings.VCENTER_POD)
         resource_pool = get_obj(content, [vim.ResourcePool], settings.VCENTER_POOL)
 
         cloneSpec = vim.vm.CloneSpec()
@@ -172,7 +199,6 @@ def create_cluster_vm(template_name, vm_name):
 
 
 def get_vm_info(vm_name):
-    validate_config()
     si = connect()
 
     if si:
@@ -194,3 +220,83 @@ def get_vm_info(vm_name):
         raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
+
+
+def copy_disk(src_url, dst_url):
+    si = connect()
+
+    if si:
+        atexit.register(Disconnect, si)
+        vdm = si.RetrieveContent().virtualDiskManager
+        task = vdm.CopyVirtualDisk(src_url, None, dst_url, None, None, False)
+        tasks.wait_for_tasks(si, [task])
+        if task.info.state != 'success':
+            raise RuntimeError('failed during call to CopyDisk')
+        else:
+            print('drive copy complete result: %s' % task.info.result)
+    else:
+        raise RuntimeError('Could not connect to vcenter using specified username and password')
+
+
+def delete_disk(target_url):
+    si = connect()
+
+    if si:
+        atexit.register(Disconnect, si)
+        content = si.RetrieveContent()
+        vdm = content.virtualDiskManager
+        task = vdm.DeleteVirtualDisk(target_url, None)
+        tasks.wait_for_tasks(si, [task])
+        if task.info.state != 'success':
+            raise RuntimeError('failed during call to DeleteDisk')
+        else:
+            print('Disk delete finished with result: %s' % task.info.result)
+    else:
+        raise RuntimeError('Could not connect to vcenter using specified username and password')
+
+
+def attach_drive(vm_name, drive_name):
+    si = connect()
+
+    if si:
+        atexit.register(Disconnect, si)
+        content = si.RetrieveContent()
+        folder = find_or_create_folder(content, settings.VCENTER_FOLDER)
+        vm = get_obj_in_folder(content, folder, [vim.VirtualMachine], vm_name)
+        if vm:
+            unit_number = 0
+            for dev in vm.config.hardware.device:
+                if hasattr(dev.backing, 'fileName'):
+                    unit_number = max(unit_number, int(dev.unitNumber) + 1)
+                    # unit_number 7 reserved for scsi controller
+                    if unit_number == 7:
+                        unit_number += 1
+                    if unit_number >= 16:
+                        raise RuntimeError("we don't support this many disks")
+                if isinstance(dev, vim.vm.device.VirtualSCSIController):
+                    controller = dev
+
+            disk_spec = vim.vm.device.VirtualDeviceSpec()
+            disk_spec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+            disk_spec.device = vim.vm.device.VirtualDisk()
+            disk_spec.device.unitNumber = unit_number
+            disk_spec.device.controllerKey = controller.key
+
+            backing = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
+            backing.fileName = drive_name
+            backing.diskMode = 'persistent'
+            disk_spec.device.backing = backing
+
+            spec = vim.vm.ConfigSpec()
+            spec.deviceChange = [disk_spec]
+
+            task = vm.ReconfigVM_Task(spec=spec)
+            tasks.wait_for_tasks(si, [task])
+            if task.info.state != 'success':
+                raise RuntimeError('failed during connection of drive to vm.')
+            else:
+                print('Disk attach finished with result: %s' % task.info.result)
+        else:
+            raise RuntimeError("could not find vm " + vm_name)
+    else:
+        raise RuntimeError('Could not connect to vcenter using specified username and password')

@@ -304,7 +304,7 @@ VCENTER_PORT = env('VCENTER_PORT', default=None)
 VCENTER_DATACENTER = env('VCENTER_DATACENTER', default=None)
 VCENTER_FOLDER = env('VCENTER_FOLDER', default=None)
 
-VCENTER_DATASTORE = env('VCENTER_DATASTORE', default=None)
+VCENTER_POD = env('VCENTER_POD', default=None)
 VCENTER_CLUSTER = env('VCENTER_CLUSTER', default=None)
 VCENTER_POOL = env('VCENTER_POOL', default=None)
 

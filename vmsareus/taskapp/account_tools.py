@@ -84,7 +84,7 @@ def set_ssh_perms(address,user,pw):
         ssh.close()
 
 
-STASH_SSH_KEY_URL = 'http://stash.lebanon.cd-adapco.com/rest/ssh/1.0/keys'
+STASH_SSH_KEY_URL = 'http://stash.lebanon.cd-adapco.com/rest/ssh/1.0/keys?user=%s'
 STASH_SSH_KEY_DELETE_URL = 'http://stash.lebanon.cd-adapco.com/rest/ssh/1.0/keys/%s'
 
 
@@ -106,12 +106,13 @@ def delete_stash_key(key_id):
 def add_key_to_user(target_user, key_data):
     user = settings.STASH_USER
     pwd = settings.STASH_PW
-    url = STASH_SSH_KEY_URL
+    url = STASH_SSH_KEY_URL % target_user
 
     payload = {'text': key_data}
     headers = {'X-Atlassian-Token': 'nocheck',
                'Accept': 'application/json',
                'Content-Type': 'application/json'}
+    print (url)
     r = requests.post(url, data=json.dumps(payload), headers=headers, auth=(user, pwd))
 
     if r.status_code == 201:
