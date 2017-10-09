@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 
+from vmsareus.taskapp.celery import attach_drive
 from vmsareus.taskapp.celery import clean_stash_key
 from vmsareus.taskapp.celery import create_account
 from vmsareus.taskapp.celery import create_drive
@@ -93,6 +94,7 @@ def vm_new(request):
                   create_account.si(vm_id),
                   setup_ssh.si(vm_id),
                   create_drive.si(vm_id),
+                  attach_drive.si(vm_id),
                   send_notify_email.si(vm_id)).apply_async()
 
             return redirect('leases:vm_list')

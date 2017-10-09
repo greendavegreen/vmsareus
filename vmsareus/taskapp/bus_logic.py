@@ -1,9 +1,11 @@
 import re
-from vmware_tools import copy_disk, delete_disk, attach_drive
+from vmware_tools import copy_disk, delete_disk, attach_drive, make_dir_if_not_present
 
 url_template = '{host}/folder/{path}/{branch}_{host_os}.vmdk?dcPath={datacenter}&dsName={datastore}'
 file_template = '[{datastore}] {path}/{branch}_{host_os}.vmdk'
 
+dir_url_template = '{host}/folder/{path}?dcPath={datacenter}&dsName={datastore}'
+dir_path_template = '[{datastore}] {path}'
 
 def normalize_branch_name(i_branch):
     if i_branch.startswith('feature/'):
@@ -41,6 +43,13 @@ def make_dev_vm_drive_url(i_host, i_path, i_branch, i_os, i_vm_id, i_datacenter,
                                      i_datastore)
 
 
+def make_target_folder_url(i_host, i_path, i_datacenter, i_datastore):
+    return dir_url_template.format(host=i_host,
+                               path=i_path,
+                               datacenter=i_datacenter,
+                               datastore=i_datastore)
+
+
 def make_dev_drive_for_branch(branch, vm_id):
     host = 'https://vcenter.lebanon.cd-adapco.com'
     host_os = 'windows'
@@ -54,8 +63,8 @@ def make_dev_drive_for_branch(branch, vm_id):
     new_ds = 'rdx1-vmsareus3'
     dst_url = make_dev_vm_drive_url(host, new_path, branch, host_os, vm_id, dc, new_ds)
 
-    #print(src_url)
-    #print(dst_url)
+    print(src_url)
+    print(dst_url)
     copy_disk(src_url, dst_url)
 
 
@@ -78,6 +87,16 @@ def attach_dev_drive(vm_name, branch, vm_id):
 
     file_name = make_dev_drive_filename(ds, path,  branch, host_os, vm_id)
     attach_drive(vm_name, file_name)
+
+
+def confirm_vm_dir():
+    host = 'https://vcenter.lebanon.cd-adapco.com'
+    path = 'new-dev-vm-drives'
+    dc = 'Lebanon'
+    ds = 'rdx1-vmsareus3'
+
+    url = make_target_folder_url(host, path, dc, ds)
+    make_dir_if_not_present(url)
 
 
 def test_drive_create():

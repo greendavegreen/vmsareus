@@ -238,6 +238,18 @@ def copy_disk(src_url, dst_url):
         raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
+def make_dir_if_not_present(target_dir_url):
+    si = connect()
+
+    if si:
+        atexit.register(Disconnect, si)
+        fm = si.RetrieveContent().fileManager
+        print(target_dir_url)
+        fm.MakeDirectory(target_dir_url)
+    else:
+        raise RuntimeError('Could not connect to vcenter using specified username and password')
+
+
 def delete_disk(target_url):
     si = connect()
 

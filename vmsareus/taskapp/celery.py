@@ -179,6 +179,21 @@ def create_drive(id):
     try:
         validate_config()
         make_dev_drive_for_branch(vm.branch_name, id)
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        pass
+
+
+@app.task()
+def attach_drive(id):
+    from ..vmleases.models import Vm
+    time.sleep(5)
+    vm = Vm.objects.get(pk=id)
+    try:
+        validate_config()
         attach_dev_drive(vm.vm_name, vm.branch_name, id)
     except:
         vm.vm_state = 'a'
