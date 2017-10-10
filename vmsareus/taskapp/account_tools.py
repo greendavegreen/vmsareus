@@ -69,7 +69,7 @@ def copy_bytes_to_target(address, user, password, bytes, dest):
 def make_ssh_dir(address, user, pw):
     try:
         ssh = create_client(address, user, pw)
-        do_cmd(ssh, 'mkdir /home/davidgr/.ssh')
+        do_cmd(ssh, 'mkdir /home/%s/.ssh' % user)
     finally:
         ssh.close()
 
@@ -77,9 +77,9 @@ def make_ssh_dir(address, user, pw):
 def set_ssh_perms(address,user,pw):
     try:
         ssh = create_client(address, user, pw)
-        do_cmd(ssh, 'chmod 400 /home/davidgr/.ssh/id_rsa')
-        do_cmd(ssh, 'chmod 744 /home/davidgr/.ssh/id_rsa.pub')
-        do_cmd(ssh, 'chmod 700 /home/davidgr/.ssh')
+        do_cmd(ssh, 'chmod 400 /home/%s/.ssh/id_rsa' % user)
+        do_cmd(ssh, 'chmod 744 /home/%s/.ssh/id_rsa.pub' % user)
+        do_cmd(ssh, 'chmod 700 /home/%s/.ssh' % user)
     finally:
         ssh.close()
 
@@ -128,10 +128,10 @@ def setup_ssh_for_user(address, user, pw, id_input):
         keypair = make_keys()
         copy_bytes_to_target(address, user, pw,
                              keypair['private'],
-                             '/home/davidgr/.ssh/id_rsa')
+                             '/home/%s/.ssh/id_rsa' % user)
         copy_bytes_to_target(address, user, pw,
                              keypair['public'],
-                             '/home/davidgr/.ssh/id_rsa.pub')
+                             '/home/%s/.ssh/id_rsa.pub' % user)
 
         set_ssh_perms(address, user, pw)
 
