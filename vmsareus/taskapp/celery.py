@@ -78,23 +78,6 @@ def send_notify_email(id):
         vm.vm_state = 'r'
         vm.save()
 
-@app.task()
-def create_account(id):
-    from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
-    try:
-        info = get_vm_info(vm.vm_name)
-        addr = info['ip']
-        new_user = vm.author.username
-        generated_pw = add_user_to_windows_machine(addr, new_user)
-    except:
-        vm.vm_state = 'a'
-        vm.save()
-        raise
-    else:
-        vm.starting_password = generated_pw
-        vm.save()
-        #send_notify_email.delay(id)
 
 
 @app.task()
@@ -113,8 +96,29 @@ def setup_ssh(id):
         vm.save()
         raise
     else:
+        vm.vm_state = 'd'
         vm.stash_key_id = key_id
         vm.save()
+
+
+@app.task()
+def create_account(id):
+    from ..vmleases.models import Vm
+    vm = Vm.objects.get(pk=id)
+    try:
+        info = get_vm_info(vm.vm_name)
+        addr = info['ip']
+        new_user = vm.author.username
+        generated_pw = add_user_to_windows_machine(addr, new_user)
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        vm.vm_state = 's'
+        vm.starting_password = generated_pw
+        vm.save()
+        #send_notify_email.delay(id)
 
 
 @app.task
@@ -132,6 +136,8 @@ def wait_for_ip(id):
         vm.save()
         raise
     else:
+        vm.vm_state = 'u'
+        vm.save()
         ip = info['ip']
         print('{} has ip {}'.format(vm.vm_name, info['ip']))
         #create_account.delay(id)
@@ -152,7 +158,7 @@ def fill_lease(id):
         vm.save()
         raise
     else:
-        vm.vm_state = 'p'
+        vm.vm_state = 'i'
         vm.vm_name = name
         vm.save()
         #wait_for_ip.delay(id)
@@ -178,7 +184,8 @@ def create_drive(id):
         vm.save()
         raise
     else:
-        pass
+        vm.vm_state = 'p'
+        vm.save()
 
 
 @app.task()
@@ -193,4 +200,5 @@ def attach_drive(id):
         vm.save()
         raise
     else:
-        pass
+        vm.vm_state = 'b'
+        vm.save()

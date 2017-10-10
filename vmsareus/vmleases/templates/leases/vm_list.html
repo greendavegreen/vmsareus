@@ -56,14 +56,13 @@
                         <div class="row" style="margin-top:20px;margin-bottom:20px">
                             <div class="col-md-12">
                                 <div class="progress">
-                                    <div class="one primary-color"></div>
+                                    <div class="one no-color"></div>
                                     <div class="two no-color"></div>
                                     <div class="three no-color"></div>
-                                    <div class="progress-bar" style="width: 27%;"></div>
+                                    <div class="progress-bar" style="width: 5%;"></div>
                                 </div>
                             </div>
                         </div>
-
                     {% elif vm.vm_state == 'c' %}
                         <hr/>
                         <div class="row">
@@ -80,6 +79,52 @@
                         <div class="row" style="margin-top:20px;margin-bottom:20px">
                             <div class="col-md-12">
                                 <div class="progress">
+                                    <div class="one no-color"></div>
+                                    <div class="two no-color"></div>
+                                    <div class="three no-color"></div>
+                                    <div class="progress-bar" style="width: 15%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif vm.vm_state == 'i' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Awaiting IP address.</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="VMware is establishing network interfaces for your VM.  VM creation can take up to an hour.  You will receive mail when the VM is ready."
+                                     height="30" >
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                    <div class="one primary-color"></div>
+                                    <div class="two no-color"></div>
+                                    <div class="three no-color"></div>
+                                    <div class="progress-bar" style="width: 40%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif vm.vm_state == 'u' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Awaiting IP address.</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="VMware is establishing network interfaces for your VM.  VM creation can take up to an hour.  You will receive mail when the VM is ready."
+                                     height="30" >
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
                                     <div class="one primary-color"></div>
                                     <div class="two primary-color"></div>
                                     <div class="three no-color"></div>
@@ -87,16 +132,62 @@
                                 </div>
                             </div>
                         </div>
-                    {% elif vm.vm_state == 'p' %}
+                    {% elif vm.vm_state == 's' %}
                         <hr/>
                         <div class="row">
                             <div class="col-10">
-                                <h3 class="text-center">Prepping system</h3>
+                                <h3 class="text-center">Creating git/Stash keys.</h3>
                             </div>
                             <div class="col-2">
                                 <img src="{{STATIC_URL}}images/information.svg"
                                      data-toggle="popover" data-trigger="hover" data-placement="left"
-                                     data-content="Your account is being created and a drive containing your branch will be attached.  This can take up to an hour.  You will receive mail when the system is ready."
+                                     data-content="VMware is establishing network interfaces for your VM.  VM creation can take up to an hour.  You will receive mail when the VM is ready."
+                                     height="30" >
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                    <div class="one primary-color"></div>
+                                    <div class="two primary-color"></div>
+                                    <div class="three no-color"></div>
+                                    <div class="progress-bar" style="width: 62%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif vm.vm_state == 'd' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Cloning workspace drive</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="The virtual drive with your feature branch code is being cloned.  VM setup can take up to an hour.  You will receive mail when the system is ready."
+                                     height="30" >
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top:20px;margin-bottom:20px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                    <div class="one primary-color"></div>
+                                    <div class="two primary-color"></div>
+                                    <div class="three no-color"></div>
+                                    <div class="progress-bar" style="width: 70%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    {% elif vm.vm_state == 'p' %}
+                        <hr/>
+                        <div class="row">
+                            <div class="col-10">
+                                <h3 class="text-center">Attaching drive.</h3>
+                            </div>
+                            <div class="col-2">
+                                <img src="{{STATIC_URL}}images/information.svg"
+                                     data-toggle="popover" data-trigger="hover" data-placement="left"
+                                     data-content="Your drive is being attached to your VM.  VM setup can take up to an hour.  You will receive mail when the system is ready."
                                      height="30" >
                             </div>
                         </div>
@@ -114,7 +205,7 @@
                         <hr/>
                         <div class="row">
                             <div class="col-10">
-                                <h3 class="text-center">Building code</h3>
+                                <h3 class="text-center">Setting up tools.</h3>
                             </div>
                             <div class="col-2">
                                 <img src="{{STATIC_URL}}images/information.svg"
@@ -134,13 +225,7 @@
                             </div>
                         </div>
                     {% elif vm.vm_state == 'r' %}
-                        <hr/>
-                        <div class="row">
-                            <div class="col-9">
-                                <h3 class="text-center">VM is ready</h3>
-                            </div>
-
-                        </div>
+                         <hr/>
 
                         <div class="row">
                             <div class="col-9"><a class="btn btn-outline-primary btn-lg btn-block"
