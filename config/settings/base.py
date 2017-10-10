@@ -8,6 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 import environ
+import psycopg2
 
 ROOT_DIR = environ.Path(__file__) - 3  # (vmsareus/config/settings/base.py - 3 = vmsareus/)
 APPS_DIR = ROOT_DIR.path('vmsareus')
@@ -118,7 +119,10 @@ DATABASES = {
         'USER': env('DB_USER', default='vmsareus'),
         'PASSWORD': env('DB_PASSWORD', default=''),
         'HOST': env('DB_HOST', default=''),
-        'PORT': env('DB_PORT', default='5432')
+        'PORT': env('DB_PORT', default='5432'),
+        'OPTIONS': {
+            'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE,
+            },
     }
 }
 

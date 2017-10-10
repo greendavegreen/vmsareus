@@ -58,7 +58,6 @@ def debug_task(self):
 @app.task
 def send_notify_email(id):
     from ..vmleases.models import Vm
-    time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
         full_url = ''.join(['http://', get_current_site(None).domain, reverse('leases:vm_detail', args=[vm.id])])
@@ -82,7 +81,6 @@ def send_notify_email(id):
 @app.task()
 def create_account(id):
     from ..vmleases.models import Vm
-    time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
         info = get_vm_info(vm.vm_name)
@@ -102,7 +100,6 @@ def create_account(id):
 @app.task()
 def setup_ssh(id):
     from ..vmleases.models import Vm
-    time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
         info = get_vm_info(vm.vm_name)
@@ -123,7 +120,6 @@ def setup_ssh(id):
 @app.task
 def wait_for_ip(id):
     from ..vmleases.models import Vm
-    time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
         while True:
@@ -143,7 +139,6 @@ def wait_for_ip(id):
 @app.task
 def fill_lease(id):
     from ..vmleases.models import Vm
-    time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
         validate_config()
@@ -174,7 +169,6 @@ def clean_stash_key(key_id):
 @app.task()
 def create_drive(id):
     from ..vmleases.models import Vm
-    time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
         validate_config()
@@ -190,7 +184,6 @@ def create_drive(id):
 @app.task()
 def attach_drive(id):
     from ..vmleases.models import Vm
-    time.sleep(5)
     vm = Vm.objects.get(pk=id)
     try:
         validate_config()
