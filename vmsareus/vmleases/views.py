@@ -31,13 +31,18 @@ def vm_list(request):
     else:
         vms = Vm.objects.filter(author=request.user)
 
+    update_required = False
+
     for vm in vms:
+        if not (vm.vm_state == 'r' or vm.vm_state == 'a'):
+            update_required = True
+
         if vm.branch_name.startswith("feature/",):
             vm.short_branch_name = vm.branch_name[8:]
         else:
             vm.short_branch_name = vm.branch_name
 
-    return render(request, 'leases/vm_list.html', {'vms': vms})
+    return render(request, 'leases/vm_list.html', {'vms': vms, 'update_required': update_required})
 
 
 @login_required
