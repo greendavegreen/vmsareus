@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Vms{% endblock %}
-
+{% block meta %}<META HTTP-EQUIV="REFRESH" CONTENT="15;URL={% url 'leases:vm_list' %}">{% endblock %}
 {% block content %}
 
     <div class="row" style="margin-top:30px;">
