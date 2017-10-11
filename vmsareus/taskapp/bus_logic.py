@@ -1,6 +1,9 @@
+import time
+
 import re
-from vmware_tools import copy_disk, delete_disk, attach_drive, disk_exists
 from pyVmomi import vim
+
+from vmware_tools import copy_disk, delete_disk, attach_drive, disk_exists
 
 url_template = '{host}/folder/{path}/{branch}_{host_os}.vmdk?dcPath={datacenter}&dsName={datastore}'
 file_template = '[{datastore}] {path}/{branch}_{host_os}.vmdk'
@@ -65,9 +68,22 @@ def make_dev_drive_for_branch(branch, vm_id):
     new_ds = 'rdx1-vmsareus3'
     dst_url = make_dev_vm_drive_url(host, new_path, branch, host_os, vm_id, dc, new_ds)
 
-    print(src_url)
-    print(dst_url)
-    copy_disk(src_url, dst_url)
+    workToDo = True
+    start_time = time.time()
+
+    while workToDo:
+        try:
+            copy_disk(src_url, dst_url)
+        except vim.fault.FileLocked:
+            # timeout after four hours
+            elapsed = time.time() - start_time
+            if elapsed > 60 * 60 * 4:
+                raise RuntimeError('timeout awaiting travelling drive to become free.')
+        else:
+            print('copy completed:')
+            print(src_url)
+            print(dst_url)
+            workToDo = False
 
 
 def td_exists(branch):
