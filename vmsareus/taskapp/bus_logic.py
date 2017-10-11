@@ -1,11 +1,13 @@
 import re
-from vmware_tools import copy_disk, delete_disk, attach_drive, make_dir_if_not_present
+from vmware_tools import copy_disk, delete_disk, attach_drive, disk_exists
+from pyVmomi import vim
 
 url_template = '{host}/folder/{path}/{branch}_{host_os}.vmdk?dcPath={datacenter}&dsName={datastore}'
 file_template = '[{datastore}] {path}/{branch}_{host_os}.vmdk'
 
 dir_url_template = '{host}/folder/{path}?dcPath={datacenter}&dsName={datastore}'
 dir_path_template = '[{datastore}] {path}'
+
 
 def normalize_branch_name(i_branch):
     if i_branch.startswith('feature/'):
@@ -68,6 +70,18 @@ def make_dev_drive_for_branch(branch, vm_id):
     copy_disk(src_url, dst_url)
 
 
+def td_exists(branch):
+    host = 'https://vcenter.lebanon.cd-adapco.com'
+    host_os = 'windows'
+    dc = 'Lebanon'
+
+    path = 'gitworkflow-workspaces'
+    ds = 'san3-travelingDrives1'
+    src_url = make_travelling_drive_url(host, path, branch, host_os, dc, ds)
+
+    print(src_url)
+    return disk_exists(src_url)
+
 
 def delete_dev_drive(branch, vm_id):
     host = 'https://vcenter.lebanon.cd-adapco.com'
@@ -89,14 +103,14 @@ def attach_dev_drive(vm_name, branch, vm_id):
     attach_drive(vm_name, file_name)
 
 
-def confirm_vm_dir():
-    host = 'https://vcenter.lebanon.cd-adapco.com'
-    path = 'new-dev-vm-drives'
-    dc = 'Lebanon'
-    ds = 'rdx1-vmsareus3'
-
-    url = make_target_folder_url(host, path, dc, ds)
-    make_dir_if_not_present(url)
+# def confirm_vm_dir():
+#     host = 'https://vcenter.lebanon.cd-adapco.com'
+#     path = 'new-dev-vm-drives'
+#     dc = 'Lebanon'
+#     ds = 'rdx1-vmsareus3'
+#
+#     url = make_target_folder_url(host, path, dc, ds)
+#     make_dir_if_not_present(url)
 
 
 def test_drive_create():
@@ -109,3 +123,24 @@ def test_drive_delete():
 
 def test_attach():
     attach_dev_drive('dev-vm-davidgr-1507228404', 'feature/davidgr/VRU-100', 10)
+
+def test_live_copy():
+    branch = 'feature/davidgr/VRU-100'
+
+    host = 'https://vcenter.lebanon.cd-adapco.com'
+    host_os = 'windows'
+    dc = 'Lebanon'
+    new_path = 'dev-vm-drives'
+    new_ds = 'rdx1-vmsareus3'
+
+    src_url = make_dev_vm_drive_url(host, new_path, branch, host_os, 46, dc, new_ds)
+    dst_url = make_dev_vm_drive_url(host, new_path, branch, host_os, 99, dc, new_ds)
+
+    print(src_url)
+    print(dst_url)
+    try:
+        copy_disk(src_url, dst_url)
+    except vim.fault.FileLocked:
+        print("file locked")
+    else:
+        print("file copied")

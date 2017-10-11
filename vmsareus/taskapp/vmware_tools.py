@@ -1,5 +1,6 @@
 import atexit
 import ssl
+import traceback
 
 import os
 from django.conf import settings
@@ -44,8 +45,7 @@ def connect():
 
 def get_obj_in_folder(content, folder, vimtype, name):
     obj = None
-    container = content.viewManager.CreateContainerView(
-        folder, vimtype, True)
+    container = content.viewManager.CreateContainerView(folder, vimtype, True)
     for c in container.view:
         if c.name == name:
             obj = c
@@ -220,6 +220,20 @@ def get_vm_info(vm_name):
         raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
+def disk_exists(src_url):
+    si = connect()
+
+    if si:
+        atexit.register(Disconnect, si)
+        vdm = si.RetrieveContent().virtualDiskManager
+        try:
+            vdm.QueryVirtualDiskUuid(src_url)
+        except:
+            return False
+        else:
+            return True
+    else:
+        raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
 def copy_disk(src_url, dst_url):
@@ -231,6 +245,7 @@ def copy_disk(src_url, dst_url):
         task = vdm.CopyVirtualDisk(src_url, None, dst_url, None, None, False)
         tasks.wait_for_tasks(si, [task])
         if task.info.state != 'success':
+            print(traceback.format_exc(10))
             raise RuntimeError('failed during call to CopyDisk')
         else:
             print('drive copy complete result: %s' % task.info.result)
@@ -238,16 +253,18 @@ def copy_disk(src_url, dst_url):
         raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
-def make_dir_if_not_present(target_dir_url):
-    si = connect()
-
-    if si:
-        atexit.register(Disconnect, si)
-        fm = si.RetrieveContent().fileManager
-        print(target_dir_url)
-        fm.MakeDirectory(target_dir_url)
-    else:
-        raise RuntimeError('Could not connect to vcenter using specified username and password')
+#this call has never succeeded
+# some sort of permission is required that our profile lacks
+# def make_dir_if_not_present(target_dir_url):
+#     si = connect()
+#
+#     if si:
+#         atexit.register(Disconnect, si)
+#         fm = si.RetrieveContent().fileManager
+#         print(target_dir_url)
+#         fm.MakeDirectory(target_dir_url)
+#     else:
+#         raise RuntimeError('Could not connect to vcenter using specified username and password')
 
 
 def delete_disk(target_url):

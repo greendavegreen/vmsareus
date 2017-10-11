@@ -58,8 +58,8 @@ def debug_task(self):
 @app.task
 def send_notify_email(id):
     from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
     try:
+        vm = Vm.objects.get(pk=id)
         full_url = ''.join(['http://', get_current_site(None).domain, reverse('leases:vm_detail', args=[vm.id])])
         send_mail(
             'Requested VM {} is ready!'.format(vm.vm_name),
@@ -83,8 +83,8 @@ def send_notify_email(id):
 @app.task()
 def setup_ssh(id):
     from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
     try:
+        vm = Vm.objects.get(pk=id)
         info = get_vm_info(vm.vm_name)
         addr = info['ip']
         key_id = setup_ssh_for_user(addr,
@@ -104,8 +104,8 @@ def setup_ssh(id):
 @app.task()
 def create_account(id):
     from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
     try:
+        vm = Vm.objects.get(pk=id)
         info = get_vm_info(vm.vm_name)
         addr = info['ip']
         new_user = vm.author.username
@@ -124,8 +124,8 @@ def create_account(id):
 @app.task
 def wait_for_ip(id):
     from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
     try:
+        vm = Vm.objects.get(pk=id)
         while True:
             info = get_vm_info(vm.vm_name)
             if info['ip']:
@@ -143,10 +143,11 @@ def wait_for_ip(id):
         #create_account.delay(id)
 
 @app.task
-def fill_lease(id):
+def fill_lease(i_id):
     from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
+    time.sleep(5)
     try:
+        vm = Vm.objects.get(pk=i_id)
         validate_config()
         vm.vm_state = 'c'
         vm.save()
@@ -175,8 +176,8 @@ def clean_stash_key(key_id):
 @app.task()
 def create_drive(id):
     from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
     try:
+        vm = Vm.objects.get(pk=id)
         validate_config()
         make_dev_drive_for_branch(vm.branch_name, id)
     except:
@@ -191,8 +192,8 @@ def create_drive(id):
 @app.task()
 def attach_drive(id):
     from ..vmleases.models import Vm
-    vm = Vm.objects.get(pk=id)
     try:
+        vm = Vm.objects.get(pk=id)
         validate_config()
         attach_dev_drive(vm.vm_name, vm.branch_name, id)
     except:
