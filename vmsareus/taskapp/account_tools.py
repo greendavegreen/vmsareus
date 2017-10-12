@@ -78,6 +78,7 @@ def set_ssh_perms(address,user,pw):
     try:
         ssh = create_client(address, user, pw)
         do_cmd(ssh, 'chmod 400 /home/%s/.ssh/id_rsa' % user)
+        do_cmd(ssh, 'chmod 664 /home/%s/.ssh/known_hosts' % user)
         do_cmd(ssh, 'chmod 744 /home/%s/.ssh/id_rsa.pub' % user)
         do_cmd(ssh, 'chmod 700 /home/%s/.ssh' % user)
     finally:
@@ -132,7 +133,10 @@ def setup_ssh_for_user(address, user, pw, id_input):
         copy_bytes_to_target(address, user, pw,
                              keypair['public'],
                              '/home/%s/.ssh/id_rsa.pub' % user)
-
+        stash_signature="stash.lebanon.cd-adapco.com,192.168.118.140 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDJHrsM9STlBsX5bF0v80Y+NBi276FnG+xTScr0wXP4vr9q+w+ZxIhKtPqLssbEfZAy8OciJGRtsX0hRxoBwDLUdHbHVCsx+fPrRPYUG3fnhIh4ZmRXja/B46bi+oh/fzDLm4QzyTcbd0pyBeAjlZbJ39KpaaSn/YEK1/jl8xPKl0E1GUYrMOUJ2Zs59sWq/m2YWxOVHnl0/u26Xs2wyelSY3ZC3W3Ar7XaMPVccRA5MMbueEFjIoXHrhLGxcJANEFxjewnJYN/Dt+OG00mngXBPHOBE+wauKM5z+bVnAh5gidGHvzd837Sv08BfUx4saibzXMt+xWNJ6LS4QRW2J2h\n"
+        copy_bytes_to_target(address, user, pw,
+                             stash_signature,
+                             '/home/%s/.ssh/known_hosts' % user)
         set_ssh_perms(address, user, pw)
 
         machine_id = 'vm_%s@vmsareus' % id_input

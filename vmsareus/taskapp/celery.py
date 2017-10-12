@@ -10,7 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.urls import reverse
 
-from .account_tools import add_user_to_windows_machine, delete_stash_key
+from .account_tools import add_user_to_windows_machine, delete_stash_key, setup_known_hosts
 from .account_tools import setup_ssh_for_user
 from .vmware_tools import clone_vm
 from .vmware_tools import create_cluster_vm
@@ -77,7 +77,6 @@ def send_notify_email(id):
         print('sent mail to {} about {}'.format(vm.author.email, full_url))
         vm.vm_state = 'r'
         vm.save()
-
 
 
 @app.task()
