@@ -10,15 +10,14 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.urls import reverse
 
-from .account_tools import add_user_to_windows_machine, delete_stash_key, setup_known_hosts
+from .account_tools import add_user_to_windows_machine, delete_stash_key, customize_git_params
 from .account_tools import setup_ssh_for_user
+from .bus_logic import attach_dev_drive
+from .bus_logic import make_dev_drive_for_branch
 from .vmware_tools import clone_vm
-from .vmware_tools import create_cluster_vm
 from .vmware_tools import delete_if_exists
 from .vmware_tools import get_vm_info
 from .vmware_tools import validate_config
-from .bus_logic import make_dev_drive_for_branch
-from .bus_logic import attach_dev_drive
 
 if not settings.configured:
     # set the default Django settings module for the 'celery' program.
@@ -98,6 +97,24 @@ def setup_ssh(id):
         vm.vm_state = 'd'
         vm.stash_key_id = key_id
         vm.save()
+
+
+@app.task()
+def setup_git(id):
+    from ..vmleases.models import Vm
+    try:
+        vm = Vm.objects.get(pk=id)
+        info = get_vm_info(vm.vm_name)
+        addr = info['ip']
+        key_id = customize_git_params(addr,
+                                    vm.author.username,
+                                    vm.starting_password)
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        pass
 
 
 @app.task()
