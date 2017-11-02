@@ -45,6 +45,7 @@ T{% block content %}
             </div>
         </div>
         <hr/>
+        <h3>Initial login info</h3>
         <div class="row" style="margin-top:30px;">
             <div class="col-12">
                 <div class="row">
@@ -91,9 +92,45 @@ T{% block content %}
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="spacer">&nbsp</div>
+                </div>
+                <h3>Change password on first login </h3>
+
+                <div class="row" style="margin-top:20px;">
+		            <div class="col-10 offset-1">
+                    	<p> We STRONGLY recommend that you change your password upon first connection.  Right-Click on Cygwin-terminal and run it as administrator.  Then use this command with your new password substituted: </p>
+		            </div>
+                </div>
+                <div class="row">
+                    <div class="col-10 offset-1">
+                        <div class="row">
+                            <div class="col-12">
+                                <pre style="padding:20px;color: silver; background: black;">net user {{ request.user.username }} YOUR_NEW_PASSWORD</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="spacer">&nbsp</div>
+                </div>
+                <h3>Create a symlink to your codebase</h3>
+                <div class="row" style="margin-top:20px;">
+		            <div class="col-10 offset-1">
+                        <p>A file titled <b>linkDevToE</b> has been placed on your desktop.  If you right click on it and choose 'Run as administrator', Windows will create a link from your cygwinHome/dev to the directory holding your workspace.  This is a one-time task and from thenceforth you will be able to start a cygwin terminal and <code>cd dev/star</code> to get to the root of your git repo as you may be familiar with in your local workstation. </p>
+		            </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="spacer">&nbsp</div>
+                </div>
+                <h3>Creating a VS solution</h3>
+
                 <div class="row" >
 		            <div class="col-10 offset-1">
-                        <span>If you are planning to create a Visual Studio solution, please </span><a href="http://devhelp.lebanon.cd-adapco.com/servicedesk/customer/portal/1">open another service desk ticket</a> <span>requesting a licence for Visual Studio 2013. Please make sure that you apply license to already installed Visual Studio 2013 before you build the solution.</span>
+                        <span>If you are planning to create a Visual Studio solution, please </span><a href="http://devhelp.lebanon.cd-adapco.com/servicedesk/customer/portal/1">open another service desk ticket</a> <span>requesting a licence for Visual Studio 2013. Please make sure that you apply the license to the already installed Visual Studio 2013 before you build the solution.</span>
                     </div>
                 </div>
 

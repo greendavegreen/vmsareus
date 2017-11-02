@@ -10,7 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.urls import reverse
 
-from .account_tools import add_user_to_windows_machine, delete_stash_key, customize_git_params
+from .account_tools import add_user_to_windows_machine, delete_stash_key, customize_git_params, setup_desktop_for_user
 from .account_tools import setup_ssh_for_user
 from .bus_logic import attach_dev_drive
 from .bus_logic import make_dev_drive_for_branch
@@ -98,6 +98,22 @@ def setup_ssh(id):
         vm.stash_key_id = key_id
         vm.save()
 
+@app.task()
+def setup_windows(id):
+    from ..vmleases.models import Vm
+    try:
+        vm = Vm.objects.get(pk=id)
+        info = get_vm_info(vm.vm_name)
+        addr = info['ip']
+        setup_desktop_for_user(addr,
+                               vm.author.username,
+                               vm.starting_password)
+    except:
+        vm.vm_state = 'a'
+        vm.save()
+        raise
+    else:
+        pass
 
 @app.task()
 def setup_git(id):

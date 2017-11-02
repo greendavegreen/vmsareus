@@ -80,6 +80,7 @@ def customize_git_params(address, user, pw):
         do_cmd(ssh, 'shopt -s dotglob && chown -R %s:None /cygdrive/e/star/*' % user, True)
         do_cmd(ssh, "sed -i '/worktree/d' /cygdrive/e/star/.git/config", True)
         do_cmd(ssh, "cd /cygdrive/e/star && git reset --hard", True)
+        do_cmd(ssh, "cd /cygdrive/e/star && git status", True)
     finally:
         ssh.close()
 
@@ -130,6 +131,23 @@ def add_key_to_user(target_user, key_data):
         return r.json()['id']
     else:
         raise RuntimeError("error posting key %s" % r.status_code)
+
+
+def setup_desktop_for_user(address, user, pw):
+    targetName = '/cygdrive/c/Users/%s/Desktop/linkDevToE.bat' % user
+    tmp = tempfile.NamedTemporaryFile(delete=True)
+    try:
+        tmp.write("pushd c:\home\%s \r\n" % user)
+        tmp.write("mklink /d dev e:\\ \r\n")
+        tmp.write("popd \r\n")
+        tmp.seek(0)
+        copy_file_to_target(address, user, pw, tmp.name, targetName)
+    except:
+        raise
+    else:
+        print('copied bat file to %s' % targetName)
+    finally:
+        tmp.close()  # deletes the file
 
 
 def setup_ssh_for_user(address, user, pw, id_input):
